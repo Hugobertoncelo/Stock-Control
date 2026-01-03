@@ -1,0 +1,493 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+
+interface DashboardStats {
+  totalProducts: number;
+  totalInventoryValue: string;
+  totalStockQuantity: number;
+  lowStockCount: number;
+  lowStockProducts: any[];
+  productsByWarehouse: any[];
+  recentStockMovements: any[];
+  profitData: any[];
+  totalProfit: string;
+  totalRevenue: string;
+}
+
+export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await fetch("/api/dashboard");
+      const result = await response.json();
+      if (result.success) {
+        setStats(result.data);
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen">
+      <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
+        <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+            <p className="text-gray-600 mt-1">Visão geral do seu inventário</p>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-gray-600 uppercase tracking-wide">
+                  Total de produtos
+                </p>
+                <p className="text-4xl font-bold text-gray-900 mt-3">
+                  {stats?.totalProducts || 0}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-blue-600 to-blue-500 p-4 rounded-xl">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-gray-600 uppercase tracking-wide">
+                  Valor do Estoque
+                </p>
+                <p className="text-4xl font-bold text-green-600 mt-3">
+                  R${stats?.totalInventoryValue || "0.00"}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-green-600 to-green-500 p-4 rounded-xl">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-gray-600 uppercase tracking-wide">
+                  Total de Estoque
+                </p>
+                <p className="text-4xl font-bold text-gray-900 mt-3">
+                  {stats?.totalStockQuantity || 0}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-600 to-purple-500 p-4 rounded-xl">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-gray-600 uppercase tracking-wide">
+                  Itens com Baixo Estoque
+                </p>
+                <p className="text-4xl font-bold text-red-600 mt-3">
+                  {stats?.lowStockCount || 0}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-red-600 to-red-500 p-4 rounded-xl">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 mb-8">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Tendência Diária de Lucros e Perdas
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Desempenho dos últimos 30 dias
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Receita Total</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  R${stats?.totalRevenue || "0.00"}
+                </p>
+                <p className="text-sm text-gray-600 mt-2">Lucro Total</p>
+                <p
+                  className={`text-2xl font-bold ${
+                    parseFloat(stats?.totalProfit || "0") >= 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  R${stats?.totalProfit || "0.00"}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            {stats?.profitData && stats.profitData.length > 0 ? (
+              <div className="space-y-4">
+                <div className="relative h-64 border-l-2 border-b-2 border-gray-300">
+                  <div className="absolute left-0 top-0 bottom-0 w-16 flex flex-col justify-between text-xs text-gray-600 pr-2 text-right pb-6">
+                    {(() => {
+                      const maxProfit = Math.max(
+                        ...stats.profitData.map((d: any) => d.profit),
+                        0
+                      );
+                      const minProfit = Math.min(
+                        ...stats.profitData.map((d: any) => d.profit),
+                        0
+                      );
+                      const range = maxProfit - minProfit;
+                      const step = range / 4;
+                      return [
+                        maxProfit,
+                        maxProfit - step,
+                        maxProfit - 2 * step,
+                        maxProfit - 3 * step,
+                        minProfit,
+                      ].map((val, i) => (
+                        <span key={i}>R${val.toFixed(0)}</span>
+                      ));
+                    })()}
+                  </div>
+
+                  <div className="absolute left-16 right-0 top-0 bottom-6 ml-4">
+                    <svg className="w-full h-full" preserveAspectRatio="none">
+                      {(() => {
+                        const data = stats.profitData;
+                        const maxProfit = Math.max(
+                          ...data.map((d: any) => d.profit),
+                          0
+                        );
+                        const minProfit = Math.min(
+                          ...data.map((d: any) => d.profit),
+                          0
+                        );
+                        const range = maxProfit - minProfit || 1;
+
+                        const points = data
+                          .map((item: any, index: number) => {
+                            const x = (index / (data.length - 1)) * 100;
+                            const y = ((maxProfit - item.profit) / range) * 100;
+                            return `${x},${y}`;
+                          })
+                          .join(" ");
+
+                        const areaPoints = `0,100 ${points} ${
+                          ((data.length - 1) / (data.length - 1)) * 100
+                        },100`;
+
+                        return (
+                          <>
+                            {minProfit < 0 && maxProfit > 0 && (
+                              <line
+                                x1="0%"
+                                y1={`${((maxProfit - 0) / range) * 100}%`}
+                                x2="100%"
+                                y2={`${((maxProfit - 0) / range) * 100}%`}
+                                stroke="#9CA3AF"
+                                strokeWidth="1"
+                                strokeDasharray="4"
+                              />
+                            )}
+
+                            <polygon
+                              points={areaPoints}
+                              fill="url(#gradient)"
+                              opacity="0.3"
+                            />
+
+                            <polyline
+                              points={points}
+                              fill="none"
+                              stroke="#10B981"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+
+                            {data.map((item: any, index: number) => {
+                              const x = (index / (data.length - 1)) * 100;
+                              const y =
+                                ((maxProfit - item.profit) / range) * 100;
+                              return (
+                                <circle
+                                  key={index}
+                                  cx={`${x}%`}
+                                  cy={`${y}%`}
+                                  r="4"
+                                  fill={
+                                    item.profit >= 0 ? "#10B981" : "#EF4444"
+                                  }
+                                  stroke="white"
+                                  strokeWidth="2"
+                                />
+                              );
+                            })}
+
+                            <defs>
+                              <linearGradient
+                                id="gradient"
+                                x1="0%"
+                                y1="0%"
+                                x2="0%"
+                                y2="100%"
+                              >
+                                <stop
+                                  offset="0%"
+                                  stopColor="#10B981"
+                                  stopOpacity="0.8"
+                                />
+                                <stop
+                                  offset="100%"
+                                  stopColor="#10B981"
+                                  stopOpacity="0.1"
+                                />
+                              </linearGradient>
+                            </defs>
+                          </>
+                        );
+                      })()}
+                    </svg>
+                  </div>
+
+                  <div className="absolute left-16 right-0 bottom-0 ml-4 flex justify-between text-xs text-gray-600">
+                    {stats.profitData.length > 0 && (
+                      <>
+                        <span>
+                          {new Date(
+                            stats.profitData[0].date
+                          ).toLocaleDateString("pt-BR", {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                        {stats.profitData.length > 2 && (
+                          <span>
+                            {new Date(
+                              stats.profitData[
+                                Math.floor(stats.profitData.length / 2)
+                              ].date
+                            ).toLocaleDateString("pt-BR", {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </span>
+                        )}
+                        <span>
+                          {new Date(
+                            stats.profitData[stats.profitData.length - 1].date
+                          ).toLocaleDateString("pt-BR", {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-200">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600">Profitable Days</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {stats.profitData.filter((d: any) => d.profit > 0).length}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600">Loss Days</p>
+                    <p className="text-2xl font-bold text-red-600">
+                      {stats.profitData.filter((d: any) => d.profit < 0).length}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600">Total Sales</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {stats.profitData.reduce(
+                        (sum: number, d: any) => sum + d.sales,
+                        0
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">
+                Não há dados de vendas disponíveis para os últimos 30 dias.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Produtos por Armazém
+              </h2>
+            </div>
+            <div className="p-6">
+              {stats?.productsByWarehouse &&
+              stats.productsByWarehouse.length > 0 ? (
+                <div className="space-y-4">
+                  {stats.productsByWarehouse.map((warehouse: any) => (
+                    <div
+                      key={warehouse.warehouseId}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
+                      <span className="font-medium text-gray-900">
+                        {warehouse.warehouseName}
+                      </span>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+                        {warehouse._count.products} products
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-4">
+                  Nenhum armazém encontrado
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Alerta de Baixo Estoque
+              </h2>
+              <p className="text-xs text-gray-500 mt-1">
+                Itens com estoque abaixo do mínimo + 10% da faixa de estoque
+              </p>
+            </div>
+            <div className="p-6">
+              {stats?.lowStockProducts && stats.lowStockProducts.length > 0 ? (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {stats.lowStockProducts.map((product: any) => (
+                    <div
+                      key={product.productId}
+                      className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200"
+                    >
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {product.productName}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          SKU: {product.sku}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Min: {product.minimumQuantity} | Max:{" "}
+                          {product.maximumQuantity}
+                        </p>
+                      </div>
+                      <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-sm font-semibold">
+                        {product.quantity} left
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-4">
+                  Todos os produtos têm estoque suficiente
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Ações Rápidas
+          </h2>
+          <div className="flex flex-wrap gap-4">
+            <Link
+              href="/products"
+              className="px-6 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg hover:from-gray-800 hover:to-gray-700 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Ver Todos os Produtos
+            </Link>
+            <Link
+              href="/products/new"
+              className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-400 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Adicionar Novo Produto
+            </Link>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

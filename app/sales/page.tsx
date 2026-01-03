@@ -1,0 +1,777 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import LoadingDots from "../components/LoadingDots";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBrazilianRealSign } from "@fortawesome/free-solid-svg-icons";
+
+interface Customer {
+  customerId: number;
+  customerName: string;
+}
+
+interface Product {
+  productId: number;
+  productName: string;
+  sku: string;
+  unitPrice: number;
+  quantity: number;
+}
+
+interface Sale {
+  saleId: number;
+  saleDate: string;
+  soldQuantity: number;
+  salePrice: number;
+  product: Product;
+  customer: Customer;
+  user: {
+    fullName: string;
+  } | null;
+  profit?: number;
+  costOfGoodsSold?: number;
+}
+
+export default function SalesPage() {
+  const { user } = useAuth();
+  const toast = useToast();
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+  const [formData, setFormData] = useState({
+    customerId: "",
+    productId: "",
+    soldQuantity: "",
+    salePrice: "",
+  });
+
+  useEffect(() => {
+    fetchSales();
+    fetchCustomers();
+    fetchProducts();
+  }, []);
+
+  const fetchSales = async () => {
+    try {
+      const response = await fetch("/api/sales");
+      const data = await response.json();
+      setSales(data);
+    } catch (error) {
+      console.error("Erro ao buscar vendas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch("/api/customers");
+      const data = await response.json();
+      setCustomers(data);
+    } catch (error) {
+      console.error("Erro ao buscar clientes:", error);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch("/api/products");
+      const result = await response.json();
+      if (result.success) {
+        setProducts(result.data);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error);
+    }
+  };
+
+  const handleAddCustomer = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formEl = e.currentTarget;
+    const formData = new FormData(formEl);
+
+    try {
+      const response = await fetch("/api/customers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user?.userId.toString() || "",
+        },
+        body: JSON.stringify({
+          customerName: formData.get("customerName"),
+          phone: formData.get("phone"),
+          email: formData.get("email"),
+          address: formData.get("address"),
+        }),
+      });
+
+      if (response.ok) {
+        const newCustomer = await response.json();
+        await fetchCustomers();
+        setShowAddCustomerModal(false);
+        setShowModal(true);
+        setTimeout(() => {
+          const selectElement = document.getElementById(
+            "customerId"
+          ) as HTMLSelectElement;
+          if (selectElement) {
+            selectElement.value = newCustomer.customerId.toString();
+          }
+        }, 100);
+      } else {
+        toast.error("Falha ao adicionar cliente");
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar cliente:", error);
+      toast.error("Ocorreu um erro");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/sales", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          createdBy: user?.userId,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Venda registrada com sucesso! Estoque atualizado.");
+        setShowModal(false);
+        setFormData({
+          customerId: "",
+          productId: "",
+          soldQuantity: "",
+          salePrice: "",
+        });
+        fetchSales();
+        fetchProducts();
+      } else {
+        toast.error("Falha ao registrar venda: " + result.error);
+      }
+    } catch (error) {
+      console.error("Erro ao criar venda:", error);
+      toast.error("Ocorreu um erro ao registrar a venda");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+
+    if (name === "productId" && value) {
+      const selectedProduct = products.find(
+        (p) => p.productId === parseInt(value)
+      );
+      if (selectedProduct && !formData.salePrice) {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          salePrice: selectedProduct.unitPrice.toString(),
+        }));
+      }
+    }
+  };
+
+  const getTotalRevenue = () => {
+    return sales.reduce(
+      (sum, s) => sum + s.soldQuantity * parseFloat(s.salePrice.toString()),
+      0
+    );
+  };
+
+  const getSelectedProductStock = () => {
+    const selectedProduct = products.find(
+      (p) => p.productId === parseInt(formData.productId)
+    );
+    return selectedProduct?.quantity || 0;
+  };
+
+  return (
+    <div className="min-h-screen">
+      <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
+        <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
+          <div className="flex justify-center items-center">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Gestão de Vendas
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Registre e acompanhe as vendas de produtos
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8">
+        <div className="bg-linear-to-br from-orange-50/60 to-red-50/40 backdrop-blur-md rounded-2xl shadow-2xl hover:shadow-3xl border border-orange-200/50 p-6 mb-8 transition-shadow duration-300">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            <h3 className="text-lg font-semibold text-orange-900">
+              Painel de Vendas
+            </h3>
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-6 py-2.5 bg-orange-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-orange-700/90 font-medium shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-2 border border-orange-500/30"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Nova Venda
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="group relative bg-linear-to-br from-orange-50/80 to-red-50/60 backdrop-blur-lg rounded-2xl shadow-2xl hover:shadow-3xl border border-orange-200/50 p-6 transform hover:scale-105 transition-all duration-300 overflow-hidden">
+              <div className="absolute inset-0 bg-linear-to-br from-orange-500 to-red-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-linear-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-orange-700 uppercase tracking-wide">
+                    Vendas Totais
+                  </h3>
+                  <p className="text-4xl font-bold text-gray-900 mt-3">
+                    {sales.length}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-orange-600/80 backdrop-blur-sm shadow-lg shadow-orange-500/20 text-white transform group-hover:rotate-12 transition-transform duration-300 border border-orange-500/30">
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div className="group relative bg-linear-to-br from-red-50/80 to-orange-50/60 backdrop-blur-lg rounded-2xl shadow-2xl hover:shadow-3xl border border-red-200/50 p-6 transform hover:scale-105 transition-all duration-300 overflow-hidden">
+              <div className="absolute inset-0 bg-linear-to-br from-red-500 to-orange-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-linear-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-red-700 uppercase tracking-wide">
+                    Itens Vendidos
+                  </h3>
+                  <p className="text-4xl font-bold text-gray-900 mt-3">
+                    {sales.reduce((sum, s) => sum + s.soldQuantity, 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-red-600/80 backdrop-blur-sm shadow-lg shadow-red-500/20 text-white transform group-hover:rotate-12 transition-transform duration-300 border border-red-500/30">
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div className="group relative bg-linear-to-br from-orange-50/80 to-red-50/60 backdrop-blur-lg rounded-2xl shadow-2xl hover:shadow-3xl border border-orange-200/50 p-6 transform hover:scale-105 transition-all duration-300 overflow-hidden">
+              <div className="absolute inset-0 bg-linear-to-br from-orange-500 to-red-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-linear-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-orange-700 uppercase tracking-wide">
+                    Receita Total
+                  </h3>
+                  <p className="text-4xl font-bold text-gray-900 mt-3">
+                    R${getTotalRevenue().toFixed(2)}
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-orange-600/80 backdrop-blur-sm shadow-lg shadow-orange-500/20 text-white transform group-hover:rotate-12 transition-transform duration-300 border border-orange-500/30">
+                  <FontAwesomeIcon
+                    icon={faBrazilianRealSign}
+                    size="lg"
+                    className="w-9 h-9"
+                    style={{
+                      stroke: "white",
+                      strokeWidth: 30,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-2xl hover:shadow-3xl overflow-hidden transition-shadow duration-300">
+          <div className="px-6 py-4 border-b border-gray-200/50 bg-orange-600/90">
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-orange-600/80 backdrop-blur-sm shadow-3xl shadow-orange-600/50 ring-4 ring-orange-100/30 border border-orange-500/30">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012 2h2a2 2 0 012-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                  />
+                </svg>
+              </span>
+              <span>Histórico de Vendas ({sales.length})</span>
+            </h2>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12 bg-white/40">
+              <LoadingDots />
+            </div>
+          ) : sales.length === 0 ? (
+            <div className="text-center py-12 bg-white/40">
+              <p className="text-gray-700 font-semibold">
+                Nenhuma venda registrada ainda
+              </p>
+              <button
+                onClick={() => setShowModal(true)}
+                className="mt-4 px-6 py-2 bg-orange-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-orange-700/90 font-semibold shadow-lg transition-all duration-300 border border-orange-500/30"
+              >
+                Registrar Primeira Venda
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-orange-600/90">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                      Data
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                      Produto
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                      Cliente
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                      Quantidade
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                      Preço Unitário
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                      Total
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                      Lucro/Prejuízo
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                      Registrado Por
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white/80 divide-y divide-gray-200">
+                  {sales.map((sale, index) => (
+                    <tr
+                      key={sale.saleId}
+                      className={`${
+                        index % 2 === 0 ? "bg-orange-50/30" : "bg-red-50/30"
+                      } hover:bg-orange-100/50 transition-all duration-200`}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        {new Date(sale.saleDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-bold text-gray-900">
+                          {sale.product.productName}
+                        </div>
+                        <div className="text-sm font-semibold text-orange-600">
+                          {sale.product.sku}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {sale.customer.customerName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-orange-600">
+                        {sale.soldQuantity}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">
+                        R${parseFloat(sale.salePrice.toString()).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-red-700">
+                        R$
+                        {(
+                          sale.soldQuantity *
+                          parseFloat(sale.salePrice.toString())
+                        ).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
+                        {sale.profit !== undefined ? (
+                          <span
+                            className={
+                              sale.profit >= 0
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }
+                          >
+                            {sale.profit >= 0 ? (
+                              <svg
+                                className="inline w-4 h-4 mr-1"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                className="inline w-4 h-4 mr-1"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            )}
+                            R${Math.abs(sale.profit).toFixed(2)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
+                        {sale.user?.fullName || "Sistema"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-60 p-4">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50">
+            <div className="bg-orange-600 px-6 py-4 rounded-t-3xl border-b-2 border-orange-500">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <svg
+                  className="w-7 h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                Registrar Nova Venda
+              </h2>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="customerId"
+                    className="block text-sm font-bold text-gray-700 mb-2"
+                  >
+                    Cliente *
+                  </label>
+                  <div className="flex gap-2">
+                    <select
+                      id="customerId"
+                      name="customerId"
+                      value={formData.customerId}
+                      onChange={handleChange}
+                      required
+                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                    >
+                      <option value="">Selecione o Cliente</option>
+                      {customers.map((customer) => (
+                        <option
+                          key={customer.customerId}
+                          value={customer.customerId}
+                        >
+                          {customer.customerName}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowModal(false);
+                        setShowAddCustomerModal(true);
+                      }}
+                      className="px-4 py-2 bg-orange-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-orange-700/90 font-bold whitespace-nowrap shadow-lg shadow-orange-600/20 transition-all duration-300 border border-orange-500/30"
+                      title="Adicionar novo cliente"
+                    >
+                      + Adicionar
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="productId"
+                    className="block text-sm font-bold text-gray-700 mb-2"
+                  >
+                    Produto *
+                  </label>
+                  <select
+                    id="productId"
+                    name="productId"
+                    value={formData.productId}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                  >
+                    <option value="">Selecionar Produto</option>
+                    {products.map((product) => (
+                      <option key={product.productId} value={product.productId}>
+                        {product.productName} ({product.sku}) - Stock:{" "}
+                        {product.quantity}
+                      </option>
+                    ))}
+                  </select>
+                  {formData.productId && (
+                    <p className="text-sm text-gray-600 font-semibold mt-1">
+                      Available stock: {getSelectedProductStock()} units
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="soldQuantity"
+                    className="block text-sm font-bold text-gray-700 mb-2"
+                  >
+                    Quantidade *
+                  </label>
+                  <input
+                    type="number"
+                    id="soldQuantity"
+                    name="soldQuantity"
+                    value={formData.soldQuantity}
+                    onChange={handleChange}
+                    required
+                    min="1"
+                    max={getSelectedProductStock()}
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="salePrice"
+                    className="block text-sm font-bold text-gray-700 mb-2"
+                  >
+                    Preço Unitário (R$) *
+                  </label>
+                  <input
+                    type="number"
+                    id="salePrice"
+                    name="salePrice"
+                    value={formData.salePrice}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                  />
+                </div>
+
+                {formData.soldQuantity && formData.salePrice && (
+                  <div className="bg-gray-100 p-3 rounded-xl border-2 border-gray-300">
+                    <p className="text-sm font-bold text-gray-900">
+                      Montante total: R$
+                      {(
+                        parseInt(formData.soldQuantity) *
+                        parseFloat(formData.salePrice)
+                      ).toFixed(2)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 px-6 py-3 bg-orange-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-orange-700/90 disabled:bg-orange-400/50 disabled:cursor-not-allowed font-bold shadow-lg shadow-orange-600/20 transition-all duration-300 flex items-center justify-center border border-orange-500/30"
+                >
+                  {loading ? <LoadingDots /> : "Registrar Venda"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-6 py-3 bg-orange-100/80 backdrop-blur-sm text-orange-800 rounded-xl hover:bg-orange-200/90 font-bold shadow-md transition-all duration-300 border border-orange-300/50"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showAddCustomerModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-60 p-4">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-orange-600 px-6 py-4 border-b-2 border-orange-500">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <svg
+                  className="w-7 h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                Adicionar Novo Cliente
+              </h2>
+            </div>
+
+            <form
+              onSubmit={handleAddCustomer}
+              className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]"
+            >
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="customerName"
+                    className="block text-sm font-bold text-gray-700 mb-2"
+                  >
+                    Nome do Cliente *
+                  </label>
+                  <input
+                    type="text"
+                    id="customerName"
+                    name="customerName"
+                    required
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="customerPhone"
+                    className="block text-sm font-bold text-gray-700 mb-2"
+                  >
+                    Telefone
+                  </label>
+                  <input
+                    type="tel"
+                    id="customerPhone"
+                    name="phone"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="customerEmail"
+                    className="block text-sm font-bold text-gray-700 mb-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="customerEmail"
+                    name="email"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="customerAddress"
+                    className="block text-sm font-bold text-gray-700 mb-2"
+                  >
+                    Endereço
+                  </label>
+                  <textarea
+                    id="customerAddress"
+                    name="address"
+                    rows={3}
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-2 bg-orange-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-orange-700/90 font-bold shadow-lg shadow-orange-600/20 transition-all duration-300 border border-orange-500/30"
+                >
+                  Adicionar Cliente
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddCustomerModal(false);
+                    setShowModal(true);
+                  }}
+                  className="flex-1 px-6 py-2 bg-orange-100/80 backdrop-blur-sm text-orange-800 rounded-xl hover:bg-orange-200/90 font-bold shadow-md transition-all duration-300 border border-orange-300/50"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

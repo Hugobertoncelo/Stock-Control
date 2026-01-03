@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model User {
+  userId              Int              @id @default(autoincrement()) @map("user_id")
+  fullName            String           @map("full_name") @db.VarChar(150)
+  email               String           @unique @db.VarChar(150)
+  passwordHash        String           @map("password_hash") @db.Text
+  role                String           @default("staff") @db.VarChar(50)
+  createdAt           DateTime         @default(now()) @map("created_at")
+  resetToken          String?          @map("reset_token") @db.Text
+  resetTokenExpiry    DateTime?        @map("reset_token_expiry")
+  
+  createdProducts Product[]        @relation("ProductCreator")
+  purchases       Purchase[]
+  sales           Sale[]
+  stockMovements  StockMovement[]
+  activityLogs    ActivityLog[]
+
+  @@map("users")
+}
+
+model Warehouse {
+  warehouseId   Int       @id @default(autoincrement()) @map("warehouse_id")
+  warehouseName String    @map("warehouse_name") @db.VarChar(150)
+  location      String?   @db.Text
+  
+  products Product[]
+
+  @@map("warehouses")
+}
+
+model Supplier {
+  supplierId    Int        @id @default(autoincrement()) @map("supplier_id")
+  supplierName  String     @map("supplier_name") @db.VarChar(150)
+  contactPerson String?    @map("contact_person") @db.VarChar(150)
+  phone         String?    @db.VarChar(50)
+  email         String?    @db.VarChar(150)
+  address       String?    @db.Text
+  
+  products  Product[]
+  purchases Purchase[]
+
+  @@map("suppliers")
+}
+
+model Customer {
+  customerId   Int     @id @default(autoincrement()) @map("customer_id")
+  customerName String  @map("customer_name") @db.VarChar(150)
+  phone        String? @db.VarChar(50)
+  email        String? @db.VarChar(150)
+  address      String? @db.Text
+  
+  sales Sale[]
+
+  @@map("customers")
+}
+
+model Product {
+  productId       Int       @id @default(autoincrement()) @map("product_id")
+  productName     String    @map("product_name") @db.VarChar(150)
+  sku             String    @unique @db.VarChar(100)
+  category        String?   @db.VarChar(100)
+  unitPrice       Decimal   @map("unit_price") @db.Decimal(10, 2)
+  quantity        Int       @default(0)
+  minimumQuantity Int       @default(0) @map("minimum_quantity")
+  maximumQuantity Int       @default(0) @map("maximum_quantity")
+  warehouseId     Int?      @map("warehouse_id")
+  supplierId      Int?      @map("supplier_id")
+  createdBy       Int?      @map("created_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  
+  warehouse       Warehouse?      @relation(fields: [warehouseId], references: [warehouseId], onDelete: SetNull)
+  supplier        Supplier?       @relation(fields: [supplierId], references: [supplierId], onDelete: SetNull)
+  creator         User?           @relation("ProductCreator", fields: [createdBy], references: [userId], onDelete: SetNull)
+  purchases       Purchase[]
+  sales           Sale[]
+  stockMovements  StockMovement[]
+  stockBatches    StockBatch[]
+
+  @@map("products")
+}
+
+model Purchase {
+  purchaseId        Int      @id @default(autoincrement()) @map("purchase_id")
+  supplierId        Int      @map("supplier_id")
+  productId         Int      @map("product_id")
+  purchasedQuantity Int      @map("purchased_quantity")
+  purchasePrice     Decimal  @map("purchase_price") @db.Decimal(10, 2)
+  purchaseDate      DateTime @default(now()) @map("purchase_date")
+  createdBy         Int?     @map("created_by")
+  
+  supplier     Supplier     @relation(fields: [supplierId], references: [supplierId], onDelete: Restrict)
+  product      Product      @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  user         User?        @relation(fields: [createdBy], references: [userId], onDelete: SetNull)
+  stockBatches StockBatch[]
+
+  @@map("purchases")
+}
+
+model Sale {
+  saleId          Int      @id @default(autoincrement()) @map("sale_id")
+  customerId      Int      @map("customer_id")
+  productId       Int      @map("product_id")
+  soldQuantity    Int      @map("sold_quantity")
+  salePrice       Decimal  @map("sale_price") @db.Decimal(10, 2)
+  costOfGoodsSold Decimal? @map("cost_of_goods_sold") @db.Decimal(10, 2)
+  saleDate        DateTime @default(now()) @map("sale_date")
+  createdBy       Int?     @map("created_by")
+  
+  customer Customer @relation(fields: [customerId], references: [customerId], onDelete: Restrict)
+  product  Product  @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  user     User?    @relation(fields: [createdBy], references: [userId], onDelete: SetNull)
+
+  @@map("sales")
+}
+
+model StockMovement {
+  movementId Int      @id @default(autoincrement()) @map("movement_id")
+  productId  Int?     @map("product_id")
+  quantity   Int
+  type       String   @db.VarChar(10)
+  reference  String?  @db.VarChar(100)
+  userId     Int?     @map("user_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  product Product? @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [userId], onDelete: SetNull)
+
+  @@map("stock_movements")
+}
+
+model StockBatch {
+  batchId          Int      @id @default(autoincrement()) @map("batch_id")
+  productId        Int      @map("product_id")
+  purchaseId       Int      @map("purchase_id")
+  quantityIn       Int      @map("quantity_in")
+  quantityRemaining Int     @map("quantity_remaining")
+  purchasePrice    Decimal  @map("purchase_price") @db.Decimal(10, 2)
+  batchDate        DateTime @default(now()) @map("batch_date")
+  
+  product  Product  @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  purchase Purchase @relation(fields: [purchaseId], references: [purchaseId], onDelete: Cascade)
+
+  @@map("stock_batches")
+}
+
+model ActivityLog {
+  logId       Int      @id @default(autoincrement()) @map("log_id")
+  userId      Int?     @map("user_id")
+  action      String   @db.VarChar(50) 
+  entityType  String   @map("entity_type") @db.VarChar(50) 
+  entityId    Int?     @map("entity_id")
+  entityName  String?  @map("entity_name") @db.VarChar(255)
+  details     String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  user User? @relation(fields: [userId], references: [userId], onDelete: SetNull)
+
+  @@map("activity_logs")
+}
