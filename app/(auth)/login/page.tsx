@@ -21,131 +21,6 @@ interface AnimatedGridPatternProps {
   repeatDelay?: number;
 }
 
-export function AnimatedGridPattern({
-  width = 40,
-  height = 40,
-  x = -1,
-  y = -1,
-  strokeDasharray = 0,
-  numSquares = 50,
-  className,
-  maxOpacity = 0.5,
-  duration = 4,
-  repeatDelay = 0.5,
-  ...props
-}: AnimatedGridPatternProps) {
-  const id = useId();
-  const containerRef = useRef(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [squares, setSquares] = useState(() => generateSquares(numSquares));
-
-  function getPos() {
-    return [
-      Math.floor((Math.random() * dimensions.width) / width),
-      Math.floor((Math.random() * dimensions.height) / height),
-    ];
-  }
-
-  function generateSquares(count: number) {
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      pos: getPos(),
-    }));
-  }
-
-  const updateSquarePosition = (id: number) => {
-    setSquares((currentSquares) =>
-      currentSquares.map((sq) =>
-        sq.id === id
-          ? {
-              ...sq,
-              pos: getPos(),
-            }
-          : sq
-      )
-    );
-  };
-
-  useEffect(() => {
-    if (dimensions.width && dimensions.height) {
-      setSquares(generateSquares(numSquares));
-    }
-  }, [dimensions, numSquares]);
-
-  useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        setDimensions({
-          width: entry.contentRect.width,
-          height: entry.contentRect.height,
-        });
-      }
-    });
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      if (containerRef.current) {
-        resizeObserver.unobserve(containerRef.current);
-      }
-    };
-  }, [containerRef]);
-
-  return (
-    <svg
-      ref={containerRef}
-      aria-hidden="true"
-      className={cn(
-        "pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30",
-        className
-      )}
-      {...props}
-    >
-      <defs>
-        <pattern
-          id={id}
-          width={width}
-          height={height}
-          patternUnits="userSpaceOnUse"
-          x={x}
-          y={y}
-        >
-          <path
-            d={`M.5 ${height}V.5H${width}`}
-            fill="none"
-            strokeDasharray={strokeDasharray}
-          />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill={`url(#${id})`} />
-      <svg x={x} y={y} className="overflow-visible">
-        {squares.map(({ pos: [x, y], id }, index) => (
-          <motion.rect
-            initial={{ opacity: 0 }}
-            animate={{ opacity: maxOpacity }}
-            transition={{
-              duration,
-              repeat: 1,
-              delay: index * 0.1,
-              repeatType: "reverse",
-            }}
-            onAnimationComplete={() => updateSquarePosition(id)}
-            key={`${x}-${y}-${index}`}
-            width={width - 1}
-            height={height - 1}
-            x={x * width + 1}
-            y={y * height + 1}
-            fill="currentColor"
-            strokeWidth="0"
-          />
-        ))}
-      </svg>
-    </svg>
-  );
-}
-
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -185,80 +60,16 @@ export default function Login() {
 
   return (
     <div className="h-screen bg-white overflow-hidden relative">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.03)_0%,rgba(255,255,255,0)_80%)]" />
-        <div className="stars-background absolute inset-0" />
-      </div>
-
-      <style>{`
-        .stars-background {
-          background-image: 
-            radial-gradient(2px 2px at 20px 30px, rgba(0,0,0,0.05), rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 40px 70px, rgba(0,0,0,0.03), rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 50px 160px, rgba(0,0,0,0.04), rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 90px 40px, rgba(0,0,0,0.03), rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 130px 80px, rgba(0,0,0,0.05), rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 160px 120px, rgba(0,0,0,0.04), rgba(0,0,0,0));
-          background-repeat: repeat;
-          background-size: 200px 200px;
-          animation: twinkle 5s ease-in-out infinite;
-          opacity: 0.3;
-        }
-
-        @keyframes twinkle {
-          0% { opacity: 0.3; }
-          50% { opacity: 0.5; }
-          100% { opacity: 0.3; }
-        }
-
-        @keyframes shooting {
-          0% {
-            transform: translateX(0) translateY(0);
-            opacity: 0.2;
-          }
-          100% {
-            transform: translateX(-1000px) translateY(1000px);
-            opacity: 0;
-          }
-        }
-
-        .shooting-star {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: rgba(0,0,0,0.1);
-          border-radius: 50%;
-          box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.05);
-          animation: shooting 3s linear infinite;
-        }
-
-        .shooting-star:nth-child(1) {
-          top: 10%;
-          right: 10%;
-          animation-delay: 0s;
-        }
-
-        .shooting-star:nth-child(2) {
-          top: 30%;
-          right: 50%;
-          animation-delay: 2s;
-        }
-
-        .shooting-star:nth-child(3) {
-          top: 50%;
-          right: 20%;
-          animation-delay: 4s;
-        }
-      `}</style>
-
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="shooting-star"></div>
-        <div className="shooting-star"></div>
-        <div className="shooting-star"></div>
-      </div>
-
-      <AnimatedGridPattern className="z-0" />
-
+      {/* Vídeo de fundo */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0 opacity-60 blur-sm"
+        src="/background-login.mp4"
+      />
+      {/* Conteúdo principal */}
       <div className="relative z-10 h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <div className="hidden lg:flex flex-col justify-center items-center text-center p-8">
