@@ -156,7 +156,7 @@ export default function ProductsTable({
                         : "bg-green-200/70 text-green-800"
                     }`}
                   >
-                    {product.quantity} units
+                    {product.quantity} unidades
                   </span>
                   {isLowStock(product) && (
                     <span className="text-xs text-red-600 mt-1 font-semibold">
@@ -169,7 +169,7 @@ export default function ProductsTable({
                 {product.warehouse?.warehouseName || "N/A"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
-                {product.creator?.fullName || "System"}
+                {product.creator?.fullName || "Sistema"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div className="flex gap-2">

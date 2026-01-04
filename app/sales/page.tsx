@@ -582,7 +582,7 @@ export default function SalesPage() {
                   </select>
                   {formData.productId && (
                     <p className="text-sm text-gray-600 font-semibold mt-1">
-                      Available stock: {getSelectedProductStock()} units
+                      Available stock: {getSelectedProductStock()} unidades
                     </p>
                   )}
                 </div>
