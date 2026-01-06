@@ -48,7 +48,7 @@ export default function NewProductPage() {
         setWarehouses(result.data);
       }
     } catch (error) {
-      console.error("Erro ao buscar armazéns:", error);
+      console.error("Erro ao buscar lojas:", error);
     }
   };
 
@@ -310,7 +310,7 @@ export default function NewProductPage() {
                   htmlFor="warehouseId"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Armazém
+                  Loja
                 </label>
                 <select
                   id="warehouseId"
@@ -319,7 +319,7 @@ export default function NewProductPage() {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">Selecionar Armazém (Opcional)</option>
+                  <option value="">Selecionar Loja (Opcional)</option>
                   {warehouses.map((warehouse) => (
                     <option
                       key={warehouse.warehouseId}

@@ -242,7 +242,7 @@ export default function ProductDetailsModal({
               </p>
             </div>
             <div className="bg-pink-50 p-4 rounded-xl border border-pink-200 shadow-sm">
-              <p className="text-sm text-pink-700 font-medium mb-1">Armazém</p>
+              <p className="text-sm text-pink-700 font-medium mb-1">Loja</p>
               <p className="text-lg font-bold text-gray-900">
                 {product.warehouse?.warehouseName || "N/A"}
               </p>

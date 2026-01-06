@@ -352,7 +352,7 @@ export default function AddProductModal({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Armazém *
+                Loja *
               </label>
               <div className="flex gap-2">
                 <select
@@ -361,10 +361,10 @@ export default function AddProductModal({
                     onFormChange({ ...form, warehouseId: e.target.value })
                   }
                   required
-                  title="Selecione um armazém"
+                  title="Selecione uma loja"
                   className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 >
-                  <option value="">Selecionar Armazém</option>
+                  <option value="">Selecionar Loja</option>
                   {warehouses.map((w) => (
                     <option key={w.warehouseId} value={w.warehouseId}>
                       {w.warehouseName}
@@ -375,7 +375,7 @@ export default function AddProductModal({
                   type="button"
                   onClick={onAddWarehouse}
                   className="px-4 py-3 bg-blue-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-blue-700/90 active:bg-blue-800 font-semibold whitespace-nowrap shadow-lg hover:shadow-xl active:shadow-2xl transition-all duration-300 border border-blue-500/30 active:border-blue-600"
-                  title="Adicionar novo armazém"
+                  title="Adicionar novo loja"
                 >
                   + Adicionar
                 </button>

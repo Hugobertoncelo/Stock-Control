@@ -395,7 +395,7 @@ export default function DashboardPage() {
           <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">
-                Produtos por Armazém
+                Produtos por Loja
               </h2>
             </div>
             <div className="p-6">
@@ -418,7 +418,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <p className="text-gray-500 text-center py-4">
-                  Nenhum armazém encontrado
+                  Nenhuma loja encontrada
                 </p>
               )}
             </div>

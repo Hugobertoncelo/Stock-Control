@@ -160,7 +160,7 @@ export default function EditProductModal({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Armazém *
+                Loja *
               </label>
               <select
                 value={form.warehouseId}
@@ -168,7 +168,7 @@ export default function EditProductModal({
                   onFormChange({ ...form, warehouseId: e.target.value })
                 }
                 required
-                title="Selecione um armazém"
+                title="Selecione um loja"
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-gray-500 transition-all"
               >
                 <option value="">Select Warehouse</option>
