@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBrazilianRealSign } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 interface DashboardStats {
   totalProducts: number;
@@ -73,12 +74,12 @@ function StatCard({
 
   return (
     <div
-      className={`group relative bg-gradient-to-br ${config.bg} backdrop-blur-md border border-white/60 rounded-2xl p-4 sm:p-6 hover:scale-[1.02] transition-all duration-300 shadow-xl hover:shadow-2xl ${config.glow} overflow-hidden`}
+      className={`group relative bg-linear-to-br ${config.bg} backdrop-blur-md border border-white/60 rounded-2xl p-4 sm:p-6 hover:scale-[1.02] transition-all duration-300 shadow-xl hover:shadow-2xl ${config.glow} overflow-hidden`}
     >
       <div
-        className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+        className={`absolute inset-0 bg-linear-to-br ${config.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
       ></div>
-      <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+      <div className="absolute -top-10 -right-10 w-40 h-40 bg-linear-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
 
       <div className="relative">
         <div className="flex items-start justify-between mb-2 sm:mb-3">
@@ -113,7 +114,7 @@ function StatCard({
             )}
           </div>
           <div
-            className={`p-2 sm:p-3 rounded-xl bg-gradient-to-br ${config.iconBg} shadow-lg ${config.glow} text-white transform group-hover:rotate-12 transition-transform duration-300`}
+            className={`p-2 sm:p-3 rounded-xl bg-linear-to-br ${config.iconBg} shadow-lg ${config.glow} text-white transform group-hover:rotate-12 transition-transform duration-300`}
           >
             {icon}
           </div>
@@ -162,11 +163,11 @@ export default function FeaturedCrmDemoSection({
 
   return (
     <div className="w-full relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-white/50 to-transparent"></div>
 
       <div className="relative">
         <div className="mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-1 sm:mb-2">
+          <h2 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-1 sm:mb-2">
             Visão Geral do Estoque
           </h2>
           <p className="text-xs sm:text-sm text-gray-600">
@@ -175,9 +176,15 @@ export default function FeaturedCrmDemoSection({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          {statCards.map((stat, index) => (
-            <StatCard key={index} {...stat} />
-          ))}
+          {statCards.map((stat, index) =>
+            index === 0 ? (
+              <Link href="/products" key={index} className="cursor-pointer">
+                <StatCard {...stat} />
+              </Link>
+            ) : (
+              <StatCard key={index} {...stat} />
+            )
+          )}
         </div>
       </div>
     </div>
