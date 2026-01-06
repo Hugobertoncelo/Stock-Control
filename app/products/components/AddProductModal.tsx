@@ -285,6 +285,108 @@ export default function AddProductModal({
                       }
                     : undefined
                 }
+                onBlur={
+                  manualSku
+                    ? (e) => {
+                        if (e.target.value) {
+                          lastCheckedSku.current = e.target.value;
+                          fetch(
+                            `/api/products?search=${encodeURIComponent(
+                              e.target.value
+                            )}`
+                          )
+                            .then((res) => res.json())
+                            .then((data) => {
+                              if (data.success && Array.isArray(data.data)) {
+                                const found = data.data.find(
+                                  (p: any) => p.sku === e.target.value
+                                );
+                                setExistingProduct(found || null);
+                                if (found && found.sku === e.target.value) {
+                                  if (
+                                    form.productName !== found.productName ||
+                                    form.category !== (found.category || "") ||
+                                    form.supplierId !==
+                                      (found.supplierId
+                                        ? found.supplierId.toString()
+                                        : "") ||
+                                    form.warehouseId !==
+                                      (found.warehouseId
+                                        ? found.warehouseId.toString()
+                                        : "") ||
+                                    form.unitPrice !== String(found.unitPrice)
+                                  ) {
+                                    onFormChange({
+                                      ...form,
+                                      productName: found.productName,
+                                      category: found.category || "",
+                                      supplierId: found.supplierId
+                                        ? found.supplierId.toString()
+                                        : "",
+                                      warehouseId: found.warehouseId
+                                        ? found.warehouseId.toString()
+                                        : "",
+                                      unitPrice: String(found.unitPrice),
+                                    });
+                                  }
+                                }
+                              }
+                            });
+                        }
+                      }
+                    : undefined
+                }
+                onFocus={
+                  manualSku
+                    ? (e) => {
+                        if (e.target.value) {
+                          lastCheckedSku.current = e.target.value;
+                          fetch(
+                            `/api/products?search=${encodeURIComponent(
+                              e.target.value
+                            )}`
+                          )
+                            .then((res) => res.json())
+                            .then((data) => {
+                              if (data.success && Array.isArray(data.data)) {
+                                const found = data.data.find(
+                                  (p: any) => p.sku === e.target.value
+                                );
+                                setExistingProduct(found || null);
+                                if (found && found.sku === e.target.value) {
+                                  if (
+                                    form.productName !== found.productName ||
+                                    form.category !== (found.category || "") ||
+                                    form.supplierId !==
+                                      (found.supplierId
+                                        ? found.supplierId.toString()
+                                        : "") ||
+                                    form.warehouseId !==
+                                      (found.warehouseId
+                                        ? found.warehouseId.toString()
+                                        : "") ||
+                                    form.unitPrice !== String(found.unitPrice)
+                                  ) {
+                                    onFormChange({
+                                      ...form,
+                                      productName: found.productName,
+                                      category: found.category || "",
+                                      supplierId: found.supplierId
+                                        ? found.supplierId.toString()
+                                        : "",
+                                      warehouseId: found.warehouseId
+                                        ? found.warehouseId.toString()
+                                        : "",
+                                      unitPrice: String(found.unitPrice),
+                                    });
+                                  }
+                                }
+                              }
+                            });
+                        }
+                      }
+                    : undefined
+                }
                 readOnly={!manualSku}
                 required
                 className={`w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${

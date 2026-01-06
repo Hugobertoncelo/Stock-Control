@@ -182,7 +182,7 @@ export default function PurchasesPage() {
         .then((res) => res.json())
         .then((data) => {
           if (data.success && Array.isArray(data.data)) {
-            const found = data.data.find(
+            const found = (data.data as any[]).find(
               (p: any) => p.sku === newProductForm.sku
             );
             setExistingProduct(found || null);
@@ -1033,6 +1033,120 @@ export default function PurchasesPage() {
                               sku: e.target.value,
                             });
                             setExistingProduct(null);
+                          }
+                        : undefined
+                    }
+                    onBlur={
+                      manualSku
+                        ? (e) => {
+                            if (e.target.value) {
+                              lastCheckedSku.current = e.target.value;
+                              fetch(
+                                `/api/products?search=${encodeURIComponent(
+                                  e.target.value
+                                )}`
+                              )
+                                .then((res) => res.json())
+                                .then((data) => {
+                                  if (
+                                    data.success &&
+                                    Array.isArray(data.data)
+                                  ) {
+                                    const found = (data.data as any[]).find(
+                                      (p) => p.sku === e.target.value
+                                    );
+                                    setExistingProduct(found || null);
+                                    if (found && found.sku === e.target.value) {
+                                      if (
+                                        newProductForm.productName !==
+                                          found.productName ||
+                                        newProductForm.category !==
+                                          (found.category || "") ||
+                                        newProductForm.supplierId !==
+                                          (found.supplierId
+                                            ? found.supplierId.toString()
+                                            : "") ||
+                                        newProductForm.warehouseId !==
+                                          (found.warehouseId
+                                            ? found.warehouseId.toString()
+                                            : "") ||
+                                        newProductForm.unitPrice !==
+                                          String(found.unitPrice)
+                                      ) {
+                                        setNewProductForm({
+                                          ...newProductForm,
+                                          productName: found.productName,
+                                          category: found.category || "",
+                                          supplierId: found.supplierId
+                                            ? found.supplierId.toString()
+                                            : "",
+                                          warehouseId: found.warehouseId
+                                            ? found.warehouseId.toString()
+                                            : "",
+                                          unitPrice: String(found.unitPrice),
+                                        });
+                                      }
+                                    }
+                                  }
+                                });
+                            }
+                          }
+                        : undefined
+                    }
+                    onFocus={
+                      manualSku
+                        ? (e) => {
+                            if (e.target.value) {
+                              lastCheckedSku.current = e.target.value;
+                              fetch(
+                                `/api/products?search=${encodeURIComponent(
+                                  e.target.value
+                                )}`
+                              )
+                                .then((res) => res.json())
+                                .then((data) => {
+                                  if (
+                                    data.success &&
+                                    Array.isArray(data.data)
+                                  ) {
+                                    const found = (data.data as any[]).find(
+                                      (p) => p.sku === e.target.value
+                                    );
+                                    setExistingProduct(found || null);
+                                    if (found && found.sku === e.target.value) {
+                                      if (
+                                        newProductForm.productName !==
+                                          found.productName ||
+                                        newProductForm.category !==
+                                          (found.category || "") ||
+                                        newProductForm.supplierId !==
+                                          (found.supplierId
+                                            ? found.supplierId.toString()
+                                            : "") ||
+                                        newProductForm.warehouseId !==
+                                          (found.warehouseId
+                                            ? found.warehouseId.toString()
+                                            : "") ||
+                                        newProductForm.unitPrice !==
+                                          String(found.unitPrice)
+                                      ) {
+                                        setNewProductForm({
+                                          ...newProductForm,
+                                          productName: found.productName,
+                                          category: found.category || "",
+                                          supplierId: found.supplierId
+                                            ? found.supplierId.toString()
+                                            : "",
+                                          warehouseId: found.warehouseId
+                                            ? found.warehouseId.toString()
+                                            : "",
+                                          unitPrice: String(found.unitPrice),
+                                        });
+                                      }
+                                    }
+                                  }
+                                });
+                            }
                           }
                         : undefined
                     }
