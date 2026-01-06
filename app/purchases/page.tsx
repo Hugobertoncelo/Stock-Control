@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -44,6 +44,9 @@ export default function PurchasesPage() {
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [manualSku, setManualSku] = useState(false);
+  const [existingProduct, setExistingProduct] = useState<any>(null);
+  const [successProductMessage, setSuccessProductMessage] = useState("");
+  const lastCheckedSku = useRef("");
   const [newProductForm, setNewProductForm] = useState({
     productName: "",
     sku: "",
@@ -167,6 +170,74 @@ export default function PurchasesPage() {
     }
   }, [showAddProductModal]);
 
+  useEffect(() => {
+    if (
+      showAddProductModal &&
+      manualSku &&
+      newProductForm.sku &&
+      newProductForm.sku !== lastCheckedSku.current
+    ) {
+      lastCheckedSku.current = newProductForm.sku;
+      fetch(`/api/products?search=${encodeURIComponent(newProductForm.sku)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.data)) {
+            const found = data.data.find(
+              (p: any) => p.sku === newProductForm.sku
+            );
+            setExistingProduct(found || null);
+            if (found && found.sku === newProductForm.sku) {
+              setNewProductForm((form) => ({
+                ...form,
+                productName: found.productName,
+                category: found.category || "",
+                supplierId: found.supplierId ? found.supplierId.toString() : "",
+                warehouseId: found.warehouseId
+                  ? found.warehouseId.toString()
+                  : "",
+                unitPrice: String(found.unitPrice),
+              }));
+            }
+          }
+        });
+    } else if (!newProductForm.sku) {
+      setExistingProduct(null);
+    }
+  }, [newProductForm.sku, manualSku, showAddProductModal]);
+
+  useEffect(() => {
+    if (!showAddProductModal) {
+      setManualSku(false);
+      setExistingProduct(null);
+      setSuccessProductMessage("");
+      setNewProductForm({
+        productName: "",
+        sku: "",
+        category: "",
+        unitPrice: "",
+        quantity: "0",
+        minimumQuantity: "0",
+        maximumQuantity: "0",
+        warehouseId: "",
+        supplierId: "",
+      });
+    }
+    if (manualSku && newProductForm.sku === "") {
+      setExistingProduct(null);
+      setNewProductForm({
+        productName: "",
+        sku: "",
+        category: "",
+        unitPrice: "",
+        quantity: "0",
+        minimumQuantity: "0",
+        maximumQuantity: "0",
+        warehouseId: "",
+        supplierId: "",
+      });
+    }
+  }, [showAddProductModal, manualSku, newProductForm.sku]);
+
   const handleAddProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -184,62 +255,77 @@ export default function PurchasesPage() {
     }
 
     try {
-      const response = await fetch("/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-id": user?.userId.toString() || "",
-        },
-        body: JSON.stringify({
-          ...newProductForm,
-          unitPrice: parseFloat(newProductForm.unitPrice),
-          quantity: parseInt(newProductForm.quantity),
-          minimumQuantity: parseInt(newProductForm.minimumQuantity),
-          maximumQuantity: parseInt(newProductForm.maximumQuantity),
-          warehouseId: parseInt(newProductForm.warehouseId),
-          supplierId: parseInt(newProductForm.supplierId),
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const newProduct = result.data || result;
-        await fetchProducts();
-        setShowAddProductModal(false);
-        setShowModal(true);
-        setNewProductForm({
-          productName: "",
-          sku: "",
-          category: "",
-          unitPrice: "",
-          quantity: "0",
-          minimumQuantity: "0",
-          maximumQuantity: "0",
-          warehouseId: "",
-          supplierId: "",
-        });
-        setTimeout(() => {
-          const selectElement = document.getElementById(
-            "productId"
-          ) as HTMLSelectElement;
-          if (selectElement && newProduct.productId) {
-            selectElement.value = newProduct.productId.toString();
-            setFormData((prev) => ({
-              ...prev,
-              productId: newProduct.productId.toString(),
-            }));
+      if (existingProduct) {
+        const novaQuantidade =
+          parseInt(existingProduct.quantity) +
+          parseInt(newProductForm.quantity || "0");
+        const response = await fetch(
+          `/api/products/${existingProduct.productId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "x-user-id": user?.userId.toString() || "",
+            },
+            body: JSON.stringify({
+              productName: newProductForm.productName,
+              sku: newProductForm.sku,
+              category: newProductForm.category,
+              unitPrice: parseFloat(newProductForm.unitPrice),
+              quantity: novaQuantidade,
+              minimumQuantity: parseInt(newProductForm.minimumQuantity),
+              maximumQuantity: parseInt(newProductForm.maximumQuantity),
+              warehouseId: parseInt(newProductForm.warehouseId),
+              supplierId: parseInt(newProductForm.supplierId),
+            }),
           }
-        }, 100);
-        toast.success("Produto adicionado com sucesso!");
-      } else {
-        const result = await response.json();
-        toast.error(
-          "Falha ao adicionar produto: " + (result.error || "Erro desconhecido")
         );
+        if (response.ok) {
+          setSuccessProductMessage("Produto atualizado com sucesso!");
+          await fetchProducts();
+          setTimeout(() => setSuccessProductMessage(""), 2000);
+          setTimeout(() => setShowAddProductModal(false), 2000);
+        } else {
+          const result = await response.json();
+          setSuccessProductMessage(
+            "Erro: " + (result.error || "Erro desconhecido")
+          );
+        }
+      } else {
+        const response = await fetch("/api/products", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-user-id": user?.userId.toString() || "",
+          },
+          body: JSON.stringify({
+            ...newProductForm,
+            unitPrice: parseFloat(newProductForm.unitPrice),
+            quantity: parseInt(newProductForm.quantity),
+            minimumQuantity: parseInt(newProductForm.minimumQuantity),
+            maximumQuantity: parseInt(newProductForm.maximumQuantity),
+            warehouseId: parseInt(newProductForm.warehouseId),
+            supplierId: parseInt(newProductForm.supplierId),
+          }),
+        });
+
+        if (response.ok) {
+          setSuccessProductMessage("Produto cadastrado com sucesso!");
+          await fetchProducts();
+          setTimeout(() => setSuccessProductMessage(""), 2000);
+          setTimeout(() => setShowAddProductModal(false), 2000);
+        } else {
+          const result = await response.json();
+          setSuccessProductMessage(
+            "Erro: " + (result.error || "Erro desconhecido")
+          );
+        }
       }
     } catch (error) {
-      console.error("Erro ao adicionar produto:", error);
-      toast.error("Ocorreu um erro ao adicionar o produto");
+      console.error("Erro ao adicionar/atualizar produto:", error);
+      setSuccessProductMessage(
+        "Erro: Ocorreu um erro ao adicionar/atualizar o produto"
+      );
     }
   };
 
@@ -941,11 +1027,13 @@ export default function PurchasesPage() {
                     value={newProductForm.sku}
                     onChange={
                       manualSku
-                        ? (e) =>
+                        ? (e) => {
                             setNewProductForm({
                               ...newProductForm,
                               sku: e.target.value,
-                            })
+                            });
+                            setExistingProduct(null);
+                          }
                         : undefined
                     }
                     readOnly={!manualSku}
@@ -961,6 +1049,25 @@ export default function PurchasesPage() {
                         : "Será gerado automaticamente"
                     }
                   />
+                  {/* Mensagem de estoque igual à página de produtos */}
+                  {manualSku && existingProduct && (
+                    <div className="text-xs text-blue-700 mt-1">
+                      Produto já existe: <b>{existingProduct.productName}</b>{" "}
+                      (Estoque atual: {existingProduct.quantity})
+                    </div>
+                  )}
+                  {/* Mensagem de erro ao cadastrar/atualizar produto */}
+                  {successProductMessage && (
+                    <p className="text-center text-green-600 font-bold mt-4">
+                      {successProductMessage}
+                    </p>
+                  )}
+                  {successProductMessage &&
+                    successProductMessage.startsWith("Erro:") && (
+                      <p className="text-center text-red-600 font-bold mt-2">
+                        {successProductMessage}
+                      </p>
+                    )}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -1139,6 +1246,11 @@ export default function PurchasesPage() {
                   Cancelar
                 </button>
               </div>
+              {successProductMessage && (
+                <p className="text-center text-green-600 font-bold mt-4">
+                  {successProductMessage}
+                </p>
+              )}
             </form>
           </div>
         </div>

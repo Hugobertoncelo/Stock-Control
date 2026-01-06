@@ -907,6 +907,7 @@ export default function ProductsPage() {
         onFormChange={setNewProductForm}
         onAddSupplier={handleAddSupplierFromProduct}
         onAddWarehouse={handleAddWarehouse}
+        onProductChanged={fetchProducts}
       />
 
       <EditProductModal

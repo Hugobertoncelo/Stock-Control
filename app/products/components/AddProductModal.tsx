@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface Warehouse {
   warehouseId: number;
@@ -33,6 +33,7 @@ interface AddProductModalProps {
   onFormChange: (form: NewProductForm) => void;
   onAddSupplier: () => void;
   onAddWarehouse: () => void;
+  onProductChanged?: () => void;
 }
 
 export default function AddProductModal({
@@ -45,8 +46,12 @@ export default function AddProductModal({
   onFormChange,
   onAddSupplier,
   onAddWarehouse,
+  onProductChanged,
 }: AddProductModalProps) {
   const [manualSku, setManualSku] = useState(false);
+  const [existingProduct, setExistingProduct] = useState<any>(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const lastCheckedSku = useRef("");
 
   useEffect(() => {
     if (show) {
@@ -57,11 +62,127 @@ export default function AddProductModal({
     }
   }, [show, manualSku]);
 
+  useEffect(() => {
+    if (manualSku && form.sku && form.sku !== lastCheckedSku.current) {
+      lastCheckedSku.current = form.sku;
+      fetch(`/api/products?search=${encodeURIComponent(form.sku)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.data)) {
+            const found = data.data.find((p: any) => p.sku === form.sku);
+            setExistingProduct(found || null);
+            if (found && found.sku === form.sku) {
+              if (
+                form.productName !== found.productName ||
+                form.category !== (found.category || "") ||
+                form.supplierId !==
+                  (found.supplierId ? found.supplierId.toString() : "") ||
+                form.warehouseId !==
+                  (found.warehouseId ? found.warehouseId.toString() : "") ||
+                form.unitPrice !== String(found.unitPrice)
+              ) {
+                onFormChange({
+                  ...form,
+                  productName: found.productName,
+                  category: found.category || "",
+                  supplierId: found.supplierId
+                    ? found.supplierId.toString()
+                    : "",
+                  warehouseId: found.warehouseId
+                    ? found.warehouseId.toString()
+                    : "",
+                  unitPrice: String(found.unitPrice),
+                });
+              }
+            }
+          }
+        });
+    } else if (!form.sku) {
+      setExistingProduct(null);
+    }
+  }, [form.sku, manualSku]);
+
+  useEffect(() => {
+    if (manualSku && form.sku === "") {
+      setExistingProduct(null);
+      onFormChange({
+        productName: "",
+        sku: "",
+        category: "",
+        unitPrice: "",
+        warehouseId: "",
+        supplierId: "",
+        minimumQuantity: "0",
+        maximumQuantity: "0",
+        currentQuantity: "0",
+      });
+    }
+  }, [form.sku, manualSku]);
+
+  useEffect(() => {
+    if (!show) {
+      setManualSku(false);
+      setExistingProduct(null);
+      onFormChange({
+        productName: "",
+        sku: "",
+        category: "",
+        unitPrice: "",
+        warehouseId: "",
+        supplierId: "",
+        minimumQuantity: "0",
+        maximumQuantity: "0",
+        currentQuantity: "0",
+      });
+    }
+  }, [show]);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (existingProduct) {
+      const novaQuantidade =
+        parseInt(existingProduct.quantity) +
+        parseInt(form.currentQuantity || "0");
+      await fetch(`/api/products/${existingProduct.productId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productName: form.productName,
+          sku: form.sku,
+          category: form.category,
+          unitPrice: parseFloat(form.unitPrice),
+          quantity: novaQuantidade,
+          minimumQuantity: parseInt(form.minimumQuantity),
+          maximumQuantity: parseInt(form.maximumQuantity),
+          warehouseId: parseInt(form.warehouseId),
+          supplierId: parseInt(form.supplierId),
+        }),
+      });
+      setSuccessMessage("Produto atualizado com sucesso!");
+      setTimeout(() => setSuccessMessage(""), 2000);
+      if (onProductChanged) onProductChanged();
+      setTimeout(() => onClose(), 2000);
+    } else {
+      await onSubmit(e);
+      setSuccessMessage("Produto cadastrado com sucesso!");
+      setTimeout(() => setSuccessMessage(""), 2000);
+      if (onProductChanged) onProductChanged();
+      setTimeout(() => onClose(), 2000);
+    }
+  }
+
   if (!show) return null;
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-3xl my-8 border-2 border-blue-200/50">
+        {successMessage ? (
+          <div className="bg-green-100 text-green-800 border border-green-300 rounded-xl px-4 py-3 text-center font-semibold mb-4">
+            {successMessage}
+          </div>
+        ) : null}
         <div className="bg-blue-600 p-6 rounded-t-3xl">
           <div className="flex justify-between items-center">
             <div>
@@ -108,7 +229,7 @@ export default function AddProductModal({
           </div>
         </div>
 
-        <form onSubmit={onSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[60vh] overflow-y-auto pr-2">
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -158,7 +279,10 @@ export default function AddProductModal({
                 value={form.sku}
                 onChange={
                   manualSku
-                    ? (e) => onFormChange({ ...form, sku: e.target.value })
+                    ? (e) => {
+                        onFormChange({ ...form, sku: e.target.value });
+                        setExistingProduct(null);
+                      }
                     : undefined
                 }
                 readOnly={!manualSku}
@@ -174,6 +298,12 @@ export default function AddProductModal({
                     : "Será gerado automaticamente"
                 }
               />
+              {manualSku && existingProduct && (
+                <div className="text-xs text-blue-700 mt-1">
+                  Produto já existe: <b>{existingProduct.productName}</b>{" "}
+                  (Estoque atual: {existingProduct.quantity})
+                </div>
+              )}
             </div>
 
             <div>
