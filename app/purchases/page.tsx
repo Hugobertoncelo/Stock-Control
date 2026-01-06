@@ -43,6 +43,7 @@ export default function PurchasesPage() {
   const [showModal, setShowModal] = useState(false);
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [manualSku, setManualSku] = useState(false);
   const [newProductForm, setNewProductForm] = useState({
     productName: "",
     sku: "",
@@ -910,13 +911,55 @@ export default function PurchasesPage() {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Código *
                   </label>
+                  <div className="flex items-center gap-2 mb-2">
+                    <input
+                      type="checkbox"
+                      checked={manualSku}
+                      onChange={(e) => {
+                        setManualSku(e.target.checked);
+                        if (!e.target.checked) {
+                          setNewProductForm((prev) => ({
+                            ...prev,
+                            sku: Date.now().toString().slice(-8),
+                          }));
+                        } else {
+                          setNewProductForm((prev) => ({ ...prev, sku: "" }));
+                        }
+                      }}
+                      id="manualSkuCheckbox"
+                      className="mr-2"
+                    />
+                    <label
+                      htmlFor="manualSkuCheckbox"
+                      className="text-sm text-gray-600 select-none cursor-pointer"
+                    >
+                      Definir código manualmente
+                    </label>
+                  </div>
                   <input
                     type="text"
                     value={newProductForm.sku}
-                    readOnly
+                    onChange={
+                      manualSku
+                        ? (e) =>
+                            setNewProductForm({
+                              ...newProductForm,
+                              sku: e.target.value,
+                            })
+                        : undefined
+                    }
+                    readOnly={!manualSku}
                     required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all bg-gray-100 cursor-not-allowed"
-                    placeholder="Será gerado automaticamente"
+                    className={`w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all ${
+                      manualSku
+                        ? "bg-white cursor-text"
+                        : "bg-gray-100 cursor-not-allowed"
+                    }`}
+                    placeholder={
+                      manualSku
+                        ? "Digite o código do produto"
+                        : "Será gerado automaticamente"
+                    }
                   />
                 </div>
                 <div>

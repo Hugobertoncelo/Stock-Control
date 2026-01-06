@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface Warehouse {
   warehouseId: number;
@@ -46,14 +46,16 @@ export default function AddProductModal({
   onAddSupplier,
   onAddWarehouse,
 }: AddProductModalProps) {
+  const [manualSku, setManualSku] = useState(false);
+
   useEffect(() => {
     if (show) {
-      if (!form.sku) {
+      if (!manualSku && !form.sku) {
         const generatedSku = Date.now().toString().slice(-8);
         onFormChange({ ...form, sku: generatedSku });
       }
     }
-  }, [show]);
+  }, [show, manualSku]);
 
   if (!show) return null;
 
@@ -128,13 +130,49 @@ export default function AddProductModal({
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Código *
               </label>
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  checked={manualSku}
+                  onChange={(e) => {
+                    setManualSku(e.target.checked);
+                    if (!e.target.checked) {
+                      const generatedSku = Date.now().toString().slice(-8);
+                      onFormChange({ ...form, sku: generatedSku });
+                    } else {
+                      onFormChange({ ...form, sku: "" });
+                    }
+                  }}
+                  id="manualSkuCheckbox"
+                  className="mr-2"
+                />
+                <label
+                  htmlFor="manualSkuCheckbox"
+                  className="text-sm text-gray-600 select-none cursor-pointer"
+                >
+                  Definir código manualmente
+                </label>
+              </div>
               <input
                 type="text"
                 value={form.sku}
-                readOnly
+                onChange={
+                  manualSku
+                    ? (e) => onFormChange({ ...form, sku: e.target.value })
+                    : undefined
+                }
+                readOnly={!manualSku}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-100 cursor-not-allowed"
-                placeholder="Será gerado automaticamente"
+                className={`w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
+                  manualSku
+                    ? "bg-white cursor-text"
+                    : "bg-gray-100 cursor-not-allowed"
+                }`}
+                placeholder={
+                  manualSku
+                    ? "Digite o código do produto"
+                    : "Será gerado automaticamente"
+                }
               />
             </div>
 

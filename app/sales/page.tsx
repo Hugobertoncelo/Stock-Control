@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import LoadingDots from "../components/LoadingDots";
@@ -49,6 +49,16 @@ export default function SalesPage() {
     soldQuantity: "",
     salePrice: "",
   });
+  const [productSearch, setProductSearch] = useState("");
+  const [showProductSuggestions, setShowProductSuggestions] = useState(false);
+  const productInputRef = useRef<HTMLInputElement>(null);
+  const productAutocompleteRef = useRef<HTMLDivElement>(null);
+
+  const filteredProducts = products.filter(
+    (product) =>
+      product.productName.toLowerCase().includes(productSearch.toLowerCase()) ||
+      product.sku.toLowerCase().includes(productSearch.toLowerCase())
+  );
 
   useEffect(() => {
     fetchSales();
@@ -206,6 +216,25 @@ export default function SalesPage() {
     );
     return selectedProduct?.quantity || 0;
   };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        productAutocompleteRef.current &&
+        !productAutocompleteRef.current.contains(event.target as Node)
+      ) {
+        setShowProductSuggestions(false);
+      }
+    }
+    if (showProductSuggestions) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showProductSuggestions]);
 
   return (
     <div className="min-h-screen">
@@ -564,22 +593,47 @@ export default function SalesPage() {
                   >
                     Produto *
                   </label>
-                  <select
-                    id="productId"
-                    name="productId"
-                    value={formData.productId}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
-                  >
-                    <option value="">Selecionar Produto</option>
-                    {products.map((product) => (
-                      <option key={product.productId} value={product.productId}>
-                        {product.productName} ({product.sku}) - Stock:{" "}
-                        {product.quantity}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative" ref={productAutocompleteRef}>
+                    <input
+                      type="text"
+                      ref={productInputRef}
+                      value={productSearch}
+                      onChange={(e) => {
+                        setProductSearch(e.target.value);
+                        setShowProductSuggestions(true);
+                        setFormData({ ...formData, productId: "" });
+                      }}
+                      onFocus={() => setShowProductSuggestions(true)}
+                      placeholder="Digite o nome ou código do produto"
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                      autoComplete="off"
+                    />
+                    {showProductSuggestions && filteredProducts.length > 0 && (
+                      <ul className="absolute z-50 bg-white border border-gray-200 rounded-xl mt-1 w-full max-h-56 overflow-y-auto shadow-xl">
+                        {filteredProducts.map((product) => (
+                          <li
+                            key={product.productId}
+                            className="px-4 py-2 cursor-pointer hover:bg-orange-100 text-sm flex justify-between items-center"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                productId: product.productId.toString(),
+                              });
+                              setProductSearch(
+                                `${product.productName} (${product.sku})`
+                              );
+                              setShowProductSuggestions(false);
+                            }}
+                          >
+                            <span>{product.productName}</span>
+                            <span className="text-xs text-gray-500 ml-2">
+                              {product.sku} | Estoque: {product.quantity}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                   {formData.productId && (
                     <p className="text-sm text-gray-600 font-semibold mt-1">
                       Available stock: {getSelectedProductStock()} unidades
