@@ -2,6 +2,8 @@
 
 import { useRef, useEffect, useState } from "react";
 import QRCode from "qrcode";
+import html2canvas from "html2canvas";
+import { useAuth } from "../../context/AuthContext";
 
 interface Product {
   productId: number;
@@ -64,12 +66,14 @@ export default function ProductDetailsModal({
   isLowStock,
 }: ProductDetailsModalProps) {
   const qrCodeRef = useRef<HTMLCanvasElement>(null);
+  const etiquetaRef = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState<string>("");
+  const { user } = useAuth();
 
   useEffect(() => {
     if (product && qrCodeRef.current) {
       QRCode.toCanvas(qrCodeRef.current, product.sku, {
-        width: 200,
+        width: 60,
         margin: 2,
       });
     }
@@ -80,6 +84,30 @@ export default function ProductDetailsModal({
       const url = qrCodeRef.current.toDataURL("image/png");
       const link = document.createElement("a");
       link.download = `${product.sku}-qrcode.png`;
+      link.href = url;
+      link.click();
+    }
+  };
+
+  const downloadEtiqueta = async () => {
+    if (etiquetaRef.current) {
+      etiquetaRef.current.className = "";
+      const styleTag = document.createElement("style");
+      styleTag.innerHTML = `
+        * { background: #fff !important; color: #1e40af !important; box-shadow: none !important; border-color: #60a5fa !important; }
+        span, div, canvas { background: #fff !important; color: #1e40af !important; }
+      `;
+      etiquetaRef.current.prepend(styleTag);
+      const canvas = await html2canvas(etiquetaRef.current, {
+        backgroundColor: "#fff",
+        scale: 2,
+        useCORS: true,
+        removeContainer: true,
+      });
+      etiquetaRef.current.removeChild(styleTag);
+      const url = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = `${product.productName}-${product.sku}.png`;
       link.href = url;
       link.click();
     }
@@ -231,28 +259,150 @@ export default function ProductDetailsModal({
 
           <div className="border-t pt-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">
-              Código QR do Produto
+              Etiqueta do Produto
             </h3>
-            <div className="flex flex-col items-center mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 shadow-sm">
-              {message && (
-                <div className="mb-4 p-2 bg-red-100 border border-red-300 text-red-700 rounded-lg text-center font-semibold">
-                  {message}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginBottom: "1.5rem",
+                background: "#eff6ff",
+              }}
+            >
+              <div
+                ref={etiquetaRef}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  border: "2px solid #60a5fa",
+                  boxShadow: "0 4px 16px #cbd5e1",
+                  padding: "0.5rem",
+                  minWidth: "260px",
+                  maxWidth: "320px",
+                  background: "#fff",
+                  color: "#1e40af",
+                  alignItems: "stretch",
+                  overflow: "hidden",
+                  position: "relative",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "1.55rem",
+                    fontWeight: 900,
+                    marginBottom: "0.75rem",
+                    letterSpacing: "0.18em",
+                    textAlign: "center",
+                    width: "100%",
+                    color: "#1e40af",
+                    textTransform: "uppercase",
+                    fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+                    textShadow: "0 3px 6px rgba(30,64,175,0.35)",
+                    display: "block",
+                  }}
+                >
+                  {user?.fullName ? user.fullName : "Minha Loja"}
+                </span>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      flex: 1,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        marginBottom: "0.35rem",
+                        color: "#1e40af",
+                        wordBreak: "break-word",
+                        whiteSpace: "normal",
+                        maxWidth: "205px",
+                        display: "block",
+                      }}
+                    >
+                      {product.productName}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                        marginBottom: "0.25rem",
+                        color: "#334155",
+                      }}
+                    >
+                      Código: {product.sku}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                        marginBottom: "0.25rem",
+                        color: "#059669",
+                      }}
+                    >
+                      Preço: R${Number(product.unitPrice).toFixed(2)}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        fontFamily: "monospace",
+                        color: "#64748b",
+                      }}
+                    >
+                      Ref: {getProductReference(product.productId)}
+                    </span>
+                  </div>
+                  <canvas
+                    ref={qrCodeRef}
+                    width={72}
+                    height={72}
+                    style={{
+                      width: 72,
+                      height: 72,
+                      border: "2px solid #60a5fa",
+                      borderRadius: 8,
+                      boxShadow: "0 2px 8px #cbd5e1",
+                      marginLeft: "-3.5rem",
+                      alignSelf: "center",
+                      marginTop: "2rem",
+                    }}
+                  ></canvas>
                 </div>
-              )}
-              <canvas
-                ref={qrCodeRef}
-                className="border-2 border-blue-300 rounded-lg mb-4 shadow-md"
-              ></canvas>
-              <p className="text-sm font-semibold text-blue-800 mb-4">
-                Código: {product.sku}
-              </p>
-              <div className="flex gap-3">
+              </div>
+              <div
+                style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}
+              >
                 <button
-                  onClick={downloadQRCode}
-                  className="px-4 py-2 bg-green-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-green-700/90 active:bg-green-800 font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl active:shadow-2xl transition-all duration-300 border border-green-500/30 active:border-green-600"
+                  onClick={downloadEtiqueta}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    borderRadius: "0.75rem",
+                    fontWeight: 600,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    boxShadow: "0 2px 8px #cbd5e1",
+                    background: "#059669",
+                    color: "#fff",
+                    border: "1px solid #059669",
+                    transition: "all 0.3s",
+                  }}
                 >
                   <svg
-                    className="w-5 h-5"
+                    style={{ width: 20, height: 20 }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -268,10 +418,22 @@ export default function ProductDetailsModal({
                 </button>
                 <button
                   onClick={shareQRCode}
-                  className="px-4 py-2 bg-blue-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-blue-700/90 active:bg-blue-800 font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl active:shadow-2xl transition-all duration-300 border border-blue-500/30 active:border-blue-600"
+                  style={{
+                    padding: "0.5rem 1rem",
+                    borderRadius: "0.75rem",
+                    fontWeight: 600,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    boxShadow: "0 2px 8px #cbd5e1",
+                    background: "#2563eb",
+                    color: "#fff",
+                    border: "1px solid #2563eb",
+                    transition: "all 0.3s",
+                  }}
                 >
                   <svg
-                    className="w-5 h-5"
+                    style={{ width: 20, height: 20 }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -415,4 +577,14 @@ export default function ProductDetailsModal({
       </div>
     </div>
   );
+}
+
+function getProductReference(productId: number) {
+  const str = productId.toString();
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString().padStart(6, "0");
 }
