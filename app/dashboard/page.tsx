@@ -446,7 +446,7 @@ export default function DashboardPage() {
                           {product.productName}
                         </p>
                         <p className="text-sm text-gray-600">
-                          SKU: {product.sku}
+                          Código: {product.sku}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           Min: {product.minimumQuantity} | Max:{" "}

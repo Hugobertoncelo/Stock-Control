@@ -225,7 +225,7 @@ export default function Home() {
                               {product.productName}
                             </p>
                             <p className="text-xs text-gray-600 mt-0.5">
-                              SKU: {product.sku}
+                              Código: {product.sku}
                             </p>
                             <div className="flex gap-3 mt-1 text-xs text-gray-500">
                               <span className="flex items-center gap-1">
