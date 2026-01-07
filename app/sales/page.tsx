@@ -54,11 +54,20 @@ export default function SalesPage() {
   const productInputRef = useRef<HTMLInputElement>(null);
   const productAutocompleteRef = useRef<HTMLDivElement>(null);
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.productName.toLowerCase().includes(productSearch.toLowerCase()) ||
-      product.sku.toLowerCase().includes(productSearch.toLowerCase())
-  );
+  const normalize = (str: string) =>
+    str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s]/g, "")
+      .toLowerCase();
+
+  const filteredProducts = products.filter((product) => {
+    const search = normalize(productSearch);
+    return (
+      normalize(product.productName).includes(search) ||
+      normalize(product.sku).includes(search)
+    );
+  });
 
   useEffect(() => {
     fetchSales();
@@ -152,6 +161,10 @@ export default function SalesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          customerId: parseInt(formData.customerId),
+          productId: parseInt(formData.productId),
+          soldQuantity: parseInt(formData.soldQuantity),
+          salePrice: parseFloat(formData.salePrice),
           createdBy: user?.userId,
         }),
       });
@@ -167,6 +180,8 @@ export default function SalesPage() {
           soldQuantity: "",
           salePrice: "",
         });
+        setProductSearch("");
+        setShowProductSuggestions(false);
         fetchSales();
         fetchProducts();
       } else {
@@ -184,22 +199,20 @@ export default function SalesPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
     if (name === "productId" && value) {
       const selectedProduct = products.find(
         (p) => p.productId === parseInt(value)
       );
-      if (selectedProduct && !formData.salePrice) {
-        setFormData((prev) => ({
-          ...prev,
-          [name]: value,
-          salePrice: selectedProduct.unitPrice.toString(),
-        }));
-      }
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        salePrice: selectedProduct ? selectedProduct.unitPrice.toString() : "",
+      }));
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
     }
   };
 
@@ -235,6 +248,23 @@ export default function SalesPage() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showProductSuggestions]);
+
+  useEffect(() => {
+    if (
+      showProductSuggestions &&
+      filteredProducts.length === 1 &&
+      productSearch.length > 0
+    ) {
+      const product = filteredProducts[0];
+      setFormData((prev) => ({
+        ...prev,
+        productId: product.productId.toString(),
+        salePrice: product.unitPrice.toString(),
+      }));
+      setProductSearch(`${product.productName} (${product.sku})`);
+      setShowProductSuggestions(false);
+    }
+  }, [productSearch, showProductSuggestions, filteredProducts]);
 
   return (
     <div className="min-h-screen">
@@ -303,7 +333,7 @@ export default function SalesPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2.5}
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012 2h2a2 2 0 012-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                     />
                   </svg>
                 </div>
@@ -524,8 +554,8 @@ export default function SalesPage() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-60 p-4">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50">
-            <div className="bg-orange-600 px-6 py-4 rounded-t-3xl border-b-2 border-orange-500">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-orange-600 px-6 py-4 border-b-2 border-orange-500">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <svg
                   className="w-7 h-7"
@@ -615,10 +645,11 @@ export default function SalesPage() {
                             key={product.productId}
                             className="px-4 py-2 cursor-pointer hover:bg-orange-100 text-sm flex justify-between items-center"
                             onClick={() => {
-                              setFormData({
-                                ...formData,
+                              setFormData((prev) => ({
+                                ...prev,
                                 productId: product.productId.toString(),
-                              });
+                                salePrice: product.unitPrice.toString(),
+                              }));
                               setProductSearch(
                                 `${product.productName} (${product.sku})`
                               );
@@ -636,7 +667,7 @@ export default function SalesPage() {
                   </div>
                   {formData.productId && (
                     <p className="text-sm text-gray-600 font-semibold mt-1">
-                      Available stock: {getSelectedProductStock()} unidades
+                      Estoque disponível: {getSelectedProductStock()} unidades
                     </p>
                   )}
                 </div>

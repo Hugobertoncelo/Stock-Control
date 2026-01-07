@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { logActivity } from '@/lib/activityLogger';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const productId = searchParams.get('productId');
+    const productId = searchParams.get("productId");
 
     const where = productId ? { productId: parseInt(productId) } : {};
 
@@ -21,12 +21,13 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: { saleDate: 'desc' },
+      orderBy: { saleDate: "desc" },
     });
 
-    // Calculate profit using stored cost of goods sold
     const salesWithProfit = sales.map((sale) => {
-      const costOfGoodsSold = sale.costOfGoodsSold ? parseFloat(sale.costOfGoodsSold.toString()) : 0;
+      const costOfGoodsSold = sale.costOfGoodsSold
+        ? parseFloat(sale.costOfGoodsSold.toString())
+        : 0;
       const revenue = sale.soldQuantity * parseFloat(sale.salePrice.toString());
       const profit = revenue - costOfGoodsSold;
 
@@ -39,9 +40,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(salesWithProfit);
   } catch (error) {
-    console.error('Error fetching sales:', error);
+    console.error("Erro ao buscar vendas:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch sales' },
+      { error: "Falha ao buscar vendas" },
       { status: 500 }
     );
   }
@@ -50,88 +51,87 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      customerId,
-      productId,
-      soldQuantity,
-      salePrice,
-      createdBy,
-    } = body;
+    const { customerId, productId, soldQuantity, salePrice, createdBy } = body;
 
-    // Validation
     if (!customerId || !productId || !soldQuantity || !salePrice) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: "Todos os campos são obrigatórios" },
         { status: 400 }
       );
     }
 
     if (soldQuantity <= 0) {
       return NextResponse.json(
-        { error: 'Quantity must be greater than 0' },
+        { error: "A quantidade deve ser maior que 0" },
         { status: 400 }
       );
     }
 
-    // Check if product has enough stock
     const product = await prisma.product.findUnique({
       where: { productId: parseInt(productId) },
     });
 
     if (!product) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { error: "Produto não encontrado" },
         { status: 404 }
       );
     }
 
     if (product.quantity < soldQuantity) {
       return NextResponse.json(
-        { error: `Insufficient stock. Available: ${product.quantity}` },
+        { error: `Estoque insuficiente. Disponível: ${product.quantity}` },
         { status: 400 }
       );
     }
 
-    // Create sale and update product stock in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Get stock batches ordered by FIFO (oldest first)
       const stockBatches = await tx.stockBatch.findMany({
         where: {
           productId: parseInt(productId),
           quantityRemaining: { gt: 0 },
         },
-        orderBy: { batchDate: 'asc' },
+        orderBy: { batchDate: "asc" },
       });
 
-      // Calculate cost using FIFO and update batches
       let remainingQty = parseInt(soldQuantity);
       let totalCost = 0;
 
-      for (const batch of stockBatches) {
-        if (remainingQty <= 0) break;
+      if (stockBatches.length > 0) {
+        for (const batch of stockBatches) {
+          if (remainingQty <= 0) break;
+          const qtyToConsume = Math.min(remainingQty, batch.quantityRemaining);
+          totalCost +=
+            qtyToConsume * parseFloat(batch.purchasePrice.toString());
+          remainingQty -= qtyToConsume;
+          await tx.stockBatch.update({
+            where: { batchId: batch.batchId },
+            data: {
+              quantityRemaining: batch.quantityRemaining - qtyToConsume,
+            },
+          });
+        }
+      } else {
+      }
 
-        const qtyToConsume = Math.min(remainingQty, batch.quantityRemaining);
-        totalCost += qtyToConsume * parseFloat(batch.purchasePrice.toString());
-        remainingQty -= qtyToConsume;
-
-        // Update batch quantity
-        await tx.stockBatch.update({
-          where: { batchId: batch.batchId },
+      const qtyToDecrement = Math.max(0, remainingQty);
+      if (qtyToDecrement > 0) {
+        if (product.quantity < qtyToDecrement) {
+          throw new Error("Estoque insuficiente disponível");
+        }
+        await tx.product.update({
+          where: { productId: parseInt(productId) },
           data: {
-            quantityRemaining: batch.quantityRemaining - qtyToConsume,
+            quantity: {
+              decrement: qtyToDecrement,
+            },
           },
         });
       }
 
-      if (remainingQty > 0) {
-        throw new Error('Insufficient stock batches available');
-      }
-
-      // Calculate profit
       const revenue = parseInt(soldQuantity) * parseFloat(salePrice);
       const profit = revenue - totalCost;
 
-      // Create sale record with cost of goods sold
       const sale = await tx.sale.create({
         data: {
           customerId: parseInt(customerId),
@@ -147,22 +147,11 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Update product stock quantity
-      await tx.product.update({
-        where: { productId: parseInt(productId) },
-        data: {
-          quantity: {
-            decrement: parseInt(soldQuantity),
-          },
-        },
-      });
-
-      // Create stock movement record
       await tx.stockMovement.create({
         data: {
           productId: parseInt(productId),
           quantity: -parseInt(soldQuantity),
-          type: 'OUT',
+          type: "OUT",
           reference: `Sale #${sale.saleId}`,
           userId: createdBy ? parseInt(createdBy) : null,
         },
@@ -175,21 +164,24 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    // Log activity
     await logActivity({
       userId: createdBy ? parseInt(createdBy) : null,
-      action: 'CREATE',
-      entityType: 'SALE',
+      action: "CREATE",
+      entityType: "SALE",
       entityId: result.saleId,
-      entityName: `${result.product.productName} to ${result.customer.customerName}`,
-      details: `Recorded sale: ${soldQuantity} units of ${result.product.productName} to ${result.customer.customerName} at $${salePrice}/unit (Profit: $${result.profit.toFixed(2)})`,
+      entityName: `${result.product.productName} para ${result.customer.customerName}`,
+      details: `Venda registrada: ${soldQuantity} unidades de ${
+        result.product.productName
+      } para ${
+        result.customer.customerName
+      } a $${salePrice}/unidade (Lucro: $${result.profit.toFixed(2)})`,
     });
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    console.error('Error creating sale:', error);
+    console.error("Erro ao criar venda:", error);
     return NextResponse.json(
-      { error: 'Failed to create sale' },
+      { error: "Falha ao criar venda" },
       { status: 500 }
     );
   }

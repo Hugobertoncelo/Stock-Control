@@ -22,7 +22,7 @@ interface ProfitLossStats {
 export default function DailyProfitLossBar() {
   const [data, setData] = useState<ProfitLossStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
+  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("7d");
 
   useEffect(() => {
     fetchProfitData();

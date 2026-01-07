@@ -18,7 +18,7 @@ export default function Footer() {
 
   return (
     <footer className="relative bg-white mt-16 border-t border-gray-200">
-      <div className="absolute inset-0 bg-linear-to-br from-gray-50 via-white to-gray-50"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-gray-50 via-gray-200 to-gray-50"></div>
 
       <div className="relative container mx-auto px-6 md:px-8 lg:px-12 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -41,7 +41,7 @@ export default function Footer() {
                   PrimeGestor
                 </h3>
                 <p className="text-xs text-gray-500">
-                  Controle total para decisões inteligentes.
+                  Excelência em gestão de estoque.
                 </p>
               </div>
             </Link>
@@ -155,11 +155,11 @@ export default function Footer() {
                 <Mail className="w-4 h-4" />
                 <span>hugobertoncelo@gmail.com</span>
               </li>
-              <li className="flex items-center gap-2 text-gray-400 text-sm">
+              <li className="flex items-center gap-2 text-gray-600 text-sm">
                 <Phone className="w-4 h-4" />
                 <span>(28) 99945-3033</span>
               </li>
-              <li className="flex items-center gap-2 text-gray-400 text-sm">
+              <li className="flex items-center gap-2 text-gray-600 text-sm">
                 <MapPin className="w-4 h-4" />
                 <span>Vitória, ES</span>
               </li>

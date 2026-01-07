@@ -23,7 +23,7 @@ export default function ProductStockTrend() {
   const [stockData, setStockData] = useState<StockMovement[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
+  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("7d");
 
   useEffect(() => {
     fetchProducts();

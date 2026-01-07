@@ -133,7 +133,7 @@ export default function Navbar() {
                   PrimeGestor
                 </h1>
                 <p className="hidden sm:block text-xs text-gray-500 font-medium">
-                  Controle total para decisões inteligentes.
+                  Excelência em gestão de estoque.
                 </p>
               </div>
             </Link>
