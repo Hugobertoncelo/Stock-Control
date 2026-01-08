@@ -114,7 +114,7 @@ export default function EditProductPage({
         setWarehouses(result.data);
       }
     } catch (error) {
-      console.error("Erro ao buscar lojas:", error);
+      console.error("Erro ao buscar cores:", error);
     }
   };
 
@@ -370,7 +370,7 @@ export default function EditProductPage({
 
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                  Loja & Fornecedor
+                  Cor & Fornecedor
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -378,7 +378,7 @@ export default function EditProductPage({
                       htmlFor="warehouseId"
                       className="block text-sm font-medium text-gray-900 mb-2"
                     >
-                      Loja
+                      Cor
                     </label>
                     <select
                       id="warehouseId"
@@ -387,7 +387,7 @@ export default function EditProductPage({
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all bg-white"
                     >
-                      <option value="">Selecionar Loja (Opcional)</option>
+                      <option value="">Selecionar Cor (Opcional)</option>
                       {warehouses.map((warehouse) => (
                         <option
                           key={warehouse.warehouseId}

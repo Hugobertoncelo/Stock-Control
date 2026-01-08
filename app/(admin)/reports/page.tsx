@@ -61,7 +61,7 @@ export default function ReportsPage() {
     {
       title: "Relatório de produtos",
       description:
-        "Exportar todos os produtos com detalhes, incluindo códigos, preços, quantidades e lojas",
+        "Exportar todos os produtos com detalhes, incluindo códigos, preços, quantidades e cores",
       icon: (
         <svg
           className="w-8 h-8"

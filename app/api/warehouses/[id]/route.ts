@@ -15,7 +15,7 @@ export async function PUT(
 
     if (!warehouseName) {
       return NextResponse.json(
-        { error: "O nome da loja é obrigatório" },
+        { error: "O nome da cor é obrigatório" },
         { status: 400 }
       );
     }
@@ -34,7 +34,7 @@ export async function PUT(
         action: "UPDATE",
         entityType: "WAREHOUSE",
         entityId: warehouseId,
-        details: `Loja atualizada: ${warehouseName}`,
+        details: `Cor atualizada: ${warehouseName}`,
       });
     }
 
@@ -43,11 +43,11 @@ export async function PUT(
       data: warehouse,
     });
   } catch (error: any) {
-    console.error("Erro ao atualizar loja:", error);
+    console.error("Erro ao atualizar cor:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Falha ao atualizar loja",
+        error: "Falha ao atualizar cor",
         message: error.message,
       },
       { status: 500 }
@@ -75,7 +75,7 @@ export async function DELETE(
 
     if (!warehouse) {
       return NextResponse.json(
-        { error: "Loja não encontrada" },
+        { error: "Cor não encontrada" },
         { status: 404 }
       );
     }
@@ -83,7 +83,7 @@ export async function DELETE(
     if (warehouse._count.products > 0) {
       return NextResponse.json(
         {
-          error: `Não é possível excluir a loja com ${warehouse._count.products} produtos. Mova ou exclua todos os produtos primeiro.`,
+          error: `Não é possível excluir a cor com ${warehouse._count.products} produtos. Mova ou exclua todos os produtos primeiro.`,
         },
         { status: 400 }
       );
@@ -99,20 +99,20 @@ export async function DELETE(
         action: "DELETE",
         entityType: "WAREHOUSE",
         entityId: warehouseId,
-        details: `Loja excluída: ${warehouse.warehouseName}`,
+        details: `Cor excluída: ${warehouse.warehouseName}`,
       });
     }
 
     return NextResponse.json({
       success: true,
-      message: "Loja excluída com sucesso",
+      message: "Cor excluída com sucesso",
     });
   } catch (error: any) {
-    console.error("Erro ao excluir loja:", error);
+    console.error("Erro ao excluir cor:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Falha ao excluir loja",
+        error: "Falha ao excluir cor",
         message: error.message,
       },
       { status: 500 }

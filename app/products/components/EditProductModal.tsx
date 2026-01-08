@@ -134,7 +134,6 @@ export default function EditProductModal({
                 <option value="acessorios">Acessórios</option>
                 <option value="eletronicos">Eletrônicos</option>
                 <option value="calçados">Calçados</option>
-                <option value="alimentos">Alimentos</option>
                 <option value="papelaria">Papelaria</option>
                 <option value="cosmeticos">Cosméticos</option>
                 <option value="outros">Outros</option>
@@ -160,7 +159,7 @@ export default function EditProductModal({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Loja *
+                Cor *
               </label>
               <select
                 value={form.warehouseId}
@@ -168,7 +167,7 @@ export default function EditProductModal({
                   onFormChange({ ...form, warehouseId: e.target.value })
                 }
                 required
-                title="Selecione um loja"
+                title="Selecione uma cor"
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-gray-500 transition-all"
               >
                 <option value="">Select Warehouse</option>

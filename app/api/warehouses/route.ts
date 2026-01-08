@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         action: "CREATE",
         entityType: "WAREHOUSE",
         entityId: warehouse.warehouseId,
-        details: `Loja criada: ${warehouseName}`,
+        details: `Cor criada: ${warehouseName}`,
       });
     }
 
@@ -72,9 +72,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Erro ao criar loja:", error);
+    console.error("Erro ao criar cor:", error);
     return NextResponse.json(
-      { error: "Falha ao criar loja", message: error.message },
+      { error: "Falha ao criar cor", message: error.message },
       { status: 500 }
     );
   }

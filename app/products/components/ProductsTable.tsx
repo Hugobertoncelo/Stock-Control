@@ -103,7 +103,7 @@ export default function ProductsTable({
               Estoque
             </th>
             <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-              Loja
+              Cor
             </th>
             <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
               Registrado Por

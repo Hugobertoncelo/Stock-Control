@@ -115,7 +115,7 @@ export default function PurchasesPage() {
         setWarehouses(result.data);
       }
     } catch (error) {
-      console.error("Erro ao buscar lojas:", error);
+      console.error("Erro ao buscar cores:", error);
     }
   };
 
@@ -1219,7 +1219,6 @@ export default function PurchasesPage() {
                       <option value="acessorios">Acessórios</option>
                       <option value="eletronicos">Eletrônicos</option>
                       <option value="calçados">Calçados</option>
-                      <option value="alimentos">Alimentos</option>
                       <option value="papelaria">Papelaria</option>
                       <option value="cosmeticos">Cosméticos</option>
                       <option value="outros">Outros</option>
@@ -1249,7 +1248,7 @@ export default function PurchasesPage() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Loja *
+                    Cor *
                   </label>
                   <select
                     value={newProductForm.warehouseId}
@@ -1260,10 +1259,10 @@ export default function PurchasesPage() {
                       })
                     }
                     required
-                    title="Selecione uma Loja"
+                    title="Selecione uma Cor"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
                   >
-                    <option value="">Selecionar Loja</option>
+                    <option value="">Selecionar Cor</option>
                     {warehouses.map((w) => (
                       <option key={w.warehouseId} value={w.warehouseId}>
                         {w.warehouseName}
