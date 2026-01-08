@@ -12,7 +12,8 @@ interface LogActivityParams {
     | "SUPPLIER"
     | "CUSTOMER"
     | "WAREHOUSE"
-    | "USER";
+    | "USER"
+    | "PRODUCT_PHOTO";
   entityId?: number;
   entityName?: string;
   details?: string;

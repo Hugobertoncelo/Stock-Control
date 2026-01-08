@@ -165,7 +165,7 @@ export default function PurchasesPage() {
     if (showAddProductModal) {
       setNewProductForm((prev) => ({
         ...prev,
-        sku: Date.now().toString().slice(-8),
+        sku: Date.now().toString().slice(13),
       }));
     }
   }, [showAddProductModal]);
@@ -1006,7 +1006,7 @@ export default function PurchasesPage() {
                         if (!e.target.checked) {
                           setNewProductForm((prev) => ({
                             ...prev,
-                            sku: Date.now().toString().slice(-8),
+                            sku: Date.now().toString().slice(-13),
                           }));
                         } else {
                           setNewProductForm((prev) => ({ ...prev, sku: "" }));

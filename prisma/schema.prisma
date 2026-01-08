@@ -83,6 +83,7 @@ model Product {
   sales           Sale[]
   stockMovements  StockMovement[]
   stockBatches    StockBatch[]
+  photos          ProductPhoto[]
 
   @@map("products")
 }
@@ -164,4 +165,17 @@ model ActivityLog {
   user User? @relation(fields: [userId], references: [userId], onDelete: SetNull)
 
   @@map("activity_logs")
+}
+
+model ProductPhoto {
+  photoId     Int      @id @default(autoincrement()) @map("photo_id")
+  productId   Int     @map("product_id")
+  url         String  @db.Text
+  fileName    String  @db.VarChar(255)
+  uploadedAt  DateTime @default(now()) @map("uploaded_at")
+  data        Bytes?
+
+  product     Product @relation(fields: [productId], references: [productId], onDelete: Cascade)
+
+  @@map("product_photos")
 }

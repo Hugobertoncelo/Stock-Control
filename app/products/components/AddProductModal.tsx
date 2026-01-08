@@ -56,7 +56,7 @@ export default function AddProductModal({
   useEffect(() => {
     if (show) {
       if (!manualSku && !form.sku) {
-        const generatedSku = Date.now().toString().slice(-8);
+        const generatedSku = Date.now().toString().slice(-13);
         onFormChange({ ...form, sku: generatedSku });
       }
     }
@@ -258,7 +258,7 @@ export default function AddProductModal({
                   onChange={(e) => {
                     setManualSku(e.target.checked);
                     if (!e.target.checked) {
-                      const generatedSku = Date.now().toString().slice(-8);
+                      const generatedSku = Date.now().toString().slice(-13);
                       onFormChange({ ...form, sku: generatedSku });
                     } else {
                       onFormChange({ ...form, sku: "" });

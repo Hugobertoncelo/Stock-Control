@@ -53,6 +53,7 @@ export default function Navbar() {
   const navItems = [
     { name: "Dashboard", path: "/", adminOnly: false },
     { name: "Produtos", path: "/products", adminOnly: false },
+    { name: "Galeria", path: "/products/photos", adminOnly: false },
     { name: "Compras", path: "/purchases", adminOnly: false },
     { name: "Vendas", path: "/sales", adminOnly: false },
     { name: "Relatórios", path: "/reports", adminOnly: true },
