@@ -51,6 +51,7 @@ export default function AddProductModal({
   const [manualSku, setManualSku] = useState(false);
   const [existingProduct, setExistingProduct] = useState<any>(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const lastCheckedSku = useRef("");
 
   useEffect(() => {
@@ -139,6 +140,7 @@ export default function AddProductModal({
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    let newProductId = null;
     if (existingProduct) {
       const novaQuantidade =
         parseInt(existingProduct.quantity) +
@@ -160,16 +162,45 @@ export default function AddProductModal({
           supplierId: parseInt(form.supplierId),
         }),
       });
+      newProductId = existingProduct.productId;
       setSuccessMessage("Produto atualizado com sucesso!");
       setTimeout(() => setSuccessMessage(""), 2000);
       if (onProductChanged) onProductChanged();
       setTimeout(() => onClose(), 2000);
     } else {
-      await onSubmit(e);
+      // Cria o produto e obtém o productId
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productName: form.productName,
+          sku: form.sku,
+          category: form.category,
+          unitPrice: parseFloat(form.unitPrice),
+          quantity: parseInt(form.currentQuantity || "0"),
+          minimumQuantity: parseInt(form.minimumQuantity),
+          maximumQuantity: parseInt(form.maximumQuantity),
+          warehouseId: parseInt(form.warehouseId),
+          supplierId: parseInt(form.supplierId),
+        }),
+      });
+      const data = await res.json();
+      newProductId = data?.data?.productId;
       setSuccessMessage("Produto cadastrado com sucesso!");
       setTimeout(() => setSuccessMessage(""), 2000);
       if (onProductChanged) onProductChanged();
       setTimeout(() => onClose(), 2000);
+    }
+    // Se houver foto selecionada, faz upload após obter productId
+    if (selectedPhoto && newProductId) {
+      const formData = new FormData();
+      formData.append("file", selectedPhoto);
+      formData.append("productId", newProductId);
+      await fetch("/api/products/photos", {
+        method: "POST",
+        body: formData,
+      });
+      setSelectedPhoto(null);
     }
   }
 
@@ -563,6 +594,52 @@ export default function AddProductModal({
                 min="0"
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Foto do Produto (opcional)
+              </label>
+              <label
+                htmlFor="product-photo-upload"
+                className={
+                  "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-400 rounded-xl cursor-pointer hover:bg-blue-50 group"
+                }
+                style={{ cursor: "pointer" }}
+              >
+                <svg
+                  className="w-10 h-10 text-blue-500 mb-2 group-hover:scale-110 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                  />
+                </svg>
+                <span className="text-blue-700 font-medium">
+                  {selectedPhoto
+                    ? selectedPhoto.name
+                    : "Clique para selecionar uma foto"}
+                </span>
+                <input
+                  id="product-photo-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (!e.target.files || e.target.files.length === 0) return;
+                    setSelectedPhoto(e.target.files[0]);
+                  }}
+                />
+              </label>
+              <p className="text-xs text-gray-500 mt-1">
+                A foto será exibida apenas na galeria do produto após o
+                cadastro.
+              </p>
             </div>
           </div>
 

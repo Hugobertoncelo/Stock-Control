@@ -10,7 +10,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBrazilianRealSign } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import ProductSearchModal from "./ProductSearchModal";
 
 interface DashboardStats {
   totalProducts: number;
@@ -164,9 +163,6 @@ export default function FeaturedCrmDemoSection({
 
   return (
     <>
-      <div className="fixed top-2 right-8 z-50">
-        <ProductSearchModal />
-      </div>
       <div className="w-full relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
         <div className="absolute inset-0 bg-linear-to-br from-white/50 to-transparent"></div>
         <div className="relative">

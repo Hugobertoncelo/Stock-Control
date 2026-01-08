@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activityLogger";
 
-// GET single product by ID or codigo
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -11,7 +10,6 @@ export async function GET(
     const { id } = await params;
 
     let product = null;
-    // Tenta buscar por productId (número)
     const productId = parseInt(id);
     if (!isNaN(productId)) {
       product = await prisma.product.findUnique({
@@ -19,7 +17,6 @@ export async function GET(
         include: { warehouse: true },
       });
     }
-    // Se não achou, tenta buscar por sku (string)
     if (!product) {
       product = await prisma.product.findUnique({
         where: { sku: id },
@@ -46,7 +43,6 @@ export async function GET(
   }
 }
 
-// PUT - Update product
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -54,7 +50,6 @@ export async function PUT(
   try {
     const { id } = await params;
 
-    // Validate that id is a valid number
     const productId = parseInt(id);
     if (isNaN(productId)) {
       return NextResponse.json(

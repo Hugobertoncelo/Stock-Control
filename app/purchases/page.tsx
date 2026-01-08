@@ -47,6 +47,7 @@ export default function PurchasesPage() {
   const [existingProduct, setExistingProduct] = useState<any>(null);
   const [successProductMessage, setSuccessProductMessage] = useState("");
   const lastCheckedSku = useRef("");
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [newProductForm, setNewProductForm] = useState({
     productName: "",
     sku: "",
@@ -255,6 +256,7 @@ export default function PurchasesPage() {
     }
 
     try {
+      let newProductId = null;
       if (existingProduct) {
         const novaQuantidade =
           parseInt(existingProduct.quantity) +
@@ -291,6 +293,7 @@ export default function PurchasesPage() {
             "Erro: " + (result.error || "Erro desconhecido")
           );
         }
+        newProductId = existingProduct.productId;
       } else {
         const response = await fetch("/api/products", {
           method: "POST",
@@ -310,6 +313,8 @@ export default function PurchasesPage() {
         });
 
         if (response.ok) {
+          const data = await response.json();
+          newProductId = data?.data?.productId;
           setSuccessProductMessage("Produto cadastrado com sucesso!");
           await fetchProducts();
           setTimeout(() => setSuccessProductMessage(""), 2000);
@@ -320,6 +325,16 @@ export default function PurchasesPage() {
             "Erro: " + (result.error || "Erro desconhecido")
           );
         }
+      }
+      if (selectedPhoto && newProductId) {
+        const formData = new FormData();
+        formData.append("file", selectedPhoto);
+        formData.append("productId", newProductId);
+        await fetch("/api/products/photos", {
+          method: "POST",
+          body: formData,
+        });
+        setSelectedPhoto(null);
       }
     } catch (error) {
       console.error("Erro ao adicionar/atualizar produto:", error);
@@ -1339,6 +1354,52 @@ export default function PurchasesPage() {
                     min="0"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
                   />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Foto do Produto (opcional)
+                  </label>
+                  <label
+                    htmlFor="product-photo-upload"
+                    className={
+                      "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-green-400 rounded-xl cursor-pointer hover:bg-green-50 group"
+                    }
+                    style={{ cursor: "pointer" }}
+                  >
+                    <svg
+                      className="w-10 h-10 text-green-500 mb-2 group-hover:scale-110 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                      />
+                    </svg>
+                    <span className="text-green-700 font-medium">
+                      {selectedPhoto
+                        ? selectedPhoto.name
+                        : "Clique para selecionar uma foto"}
+                    </span>
+                    <input
+                      id="product-photo-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (!e.target.files || e.target.files.length === 0)
+                          return;
+                        setSelectedPhoto(e.target.files[0]);
+                      }}
+                    />
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    A foto será exibida apenas na galeria do produto após o
+                    cadastro.
+                  </p>
                 </div>
               </div>
 
