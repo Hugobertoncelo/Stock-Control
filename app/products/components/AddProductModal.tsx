@@ -645,7 +645,7 @@ export default function AddProductModal({
           <div className="flex gap-4 mt-6 pt-6 border-t border-gray-200">
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-blue-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-blue-700/90 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] border border-blue-500/30"
+              className="flex-1 px-6 py-3 bg-blue-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-blue-700/90 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] border border-blue-500/30 cursor-pointer"
             >
               Criar Produto
             </button>

@@ -1405,7 +1405,7 @@ export default function PurchasesPage() {
               <div className="flex gap-4 mt-6 pt-6 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-green-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-green-700/90 font-semibold shadow-xl shadow-green-600/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] border border-green-500/30"
+                  className="flex-1 px-6 py-3 bg-green-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-green-700/90 font-semibold shadow-xl shadow-green-600/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] border border-green-500/30 cursor-pointer"
                 >
                   Criar Produto
                 </button>

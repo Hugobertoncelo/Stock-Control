@@ -180,7 +180,7 @@ const ProductPhotos: React.FC = () => {
         <button
           type="submit"
           disabled={loading}
-          className="bg-gray-900 text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-700 transition-all"
+          className="bg-gray-900 text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-700 transition-all cursor-pointer"
         >
           {loading ? "Enviando..." : "Enviar Foto"}
         </button>
@@ -188,7 +188,7 @@ const ProductPhotos: React.FC = () => {
       <div className="w-full md:w-60 mb-6">
         <input
           type="text"
-          placeholder="Pesquisar produto por nome ou código..."
+          placeholder="Pesquisar produto..."
           className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-gray-900"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
