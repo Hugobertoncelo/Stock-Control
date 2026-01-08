@@ -10,6 +10,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBrazilianRealSign } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import ProductSearch from "./product-search";
+import { useEffect, useState } from "react";
 
 interface DashboardStats {
   totalProducts: number;
@@ -28,6 +30,14 @@ interface StatCardProps {
   trend?: string;
   trendDirection?: "up" | "down";
   color: "blue" | "green" | "purple" | "red";
+}
+
+interface ProductSearchItem {
+  id: string;
+  name: string;
+  code: string;
+  price: number;
+  imageUrl?: string;
 }
 
 function StatCard({
@@ -129,6 +139,26 @@ export default function FeaturedCrmDemoSection({
 }: {
   stats: DashboardStats;
 }) {
+  const [products, setProducts] = useState<ProductSearchItem[]>([]);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        const productsWithImages = data.data.map((p: any) => ({
+          id: p.productId.toString(),
+          name: p.productName,
+          code: p.sku,
+          price: Number(p.unitPrice),
+          imageUrl: `/api/products/photo?productId=${p.productId}`,
+        }));
+        setProducts(productsWithImages);
+      }
+    }
+    fetchProducts();
+  }, []);
+
   const statCards: StatCardProps[] = [
     {
       title: "Total de Produtos",
@@ -163,6 +193,9 @@ export default function FeaturedCrmDemoSection({
 
   return (
     <>
+      <div className="mb-6">
+        <ProductSearch products={products} />
+      </div>
       <div className="w-full relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
         <div className="absolute inset-0 bg-linear-to-br from-white/50 to-transparent"></div>
         <div className="relative">

@@ -37,12 +37,21 @@ export async function POST(request: NextRequest) {
     const productId = formData.get("productId");
     const file = formData.get("file");
     if (!productId || !file || typeof file === "string") {
+      console.error("[UPLOAD] Dados inválidos", { productId, file });
       return NextResponse.json(
         { success: false, error: "Dados inválidos." },
         { status: 400 }
       );
     }
-    const buffer = Buffer.from(await file.arrayBuffer());
+    console.log("[UPLOAD] Recebido arquivo:", {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
+    const arrayBuffer = await file.arrayBuffer();
+    console.log("[UPLOAD] arrayBuffer length:", arrayBuffer.byteLength);
+    const buffer = Buffer.from(arrayBuffer);
+    console.log("[UPLOAD] buffer length:", buffer.length);
     const photo = await prisma.productPhoto.create({
       data: {
         productId: parseInt(productId as string),
@@ -50,6 +59,10 @@ export async function POST(request: NextRequest) {
         data: buffer,
         url: "",
       },
+    });
+    console.log("[UPLOAD] Foto salva no banco:", {
+      photoId: photo.photoId,
+      dataLength: photo.data?.length,
     });
     await logActivity({
       userId: null,
@@ -61,6 +74,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json({ success: true, data: photo });
   } catch (error: any) {
+    console.error("[UPLOAD] Erro ao salvar imagem:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
