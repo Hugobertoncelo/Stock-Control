@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activityLogger";
 
-// GET single product by ID
+// GET single product by ID or codigo
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -10,29 +10,28 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // Validate that id is a valid number
+    let product = null;
+    // Tenta buscar por productId (número)
     const productId = parseInt(id);
-    if (isNaN(productId)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid product ID" },
-        { status: 400 }
-      );
+    if (!isNaN(productId)) {
+      product = await prisma.product.findUnique({
+        where: { productId },
+        include: { warehouse: true },
+      });
     }
-
-    const product = await prisma.product.findUnique({
-      where: { productId },
-      include: {
-        warehouse: true,
-      },
-    });
-
+    // Se não achou, tenta buscar por sku (string)
+    if (!product) {
+      product = await prisma.product.findUnique({
+        where: { sku: id },
+        include: { warehouse: true },
+      });
+    }
     if (!product) {
       return NextResponse.json(
         { success: false, error: "Product not found" },
         { status: 404 }
       );
     }
-
     return NextResponse.json({ success: true, data: product });
   } catch (error: any) {
     console.error("Error fetching product:", error);

@@ -10,6 +10,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBrazilianRealSign } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import ProductSearchModal from "./ProductSearchModal";
 
 interface DashboardStats {
   totalProducts: number;
@@ -162,31 +163,35 @@ export default function FeaturedCrmDemoSection({
   ];
 
   return (
-    <div className="w-full relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-      <div className="absolute inset-0 bg-linear-to-br from-white/50 to-transparent"></div>
+    <>
+      <div className="fixed top-2 right-8 z-50">
+        <ProductSearchModal />
+      </div>
+      <div className="w-full relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+        <div className="absolute inset-0 bg-linear-to-br from-white/50 to-transparent"></div>
+        <div className="relative">
+          <div className="mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-1 sm:mb-2">
+              Visão Geral do Estoque
+            </h2>
 
-      <div className="relative">
-        <div className="mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-1 sm:mb-2">
-            Visão Geral do Estoque
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-600">
-            Informações em tempo real sobre a gestão do seu estoque.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          {statCards.map((stat, index) =>
-            index === 0 ? (
-              <Link href="/products" key={index} className="cursor-pointer">
-                <StatCard {...stat} />
-              </Link>
-            ) : (
-              <StatCard key={index} {...stat} />
-            )
-          )}
+            <p className="text-xs sm:text-sm text-gray-600">
+              Informações em tempo real sobre a gestão do seu estoque.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            {statCards.map((stat, index) =>
+              index === 0 ? (
+                <Link href="/products" key={index} className="cursor-pointer">
+                  <StatCard {...stat} />
+                </Link>
+              ) : (
+                <StatCard key={index} {...stat} />
+              )
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
