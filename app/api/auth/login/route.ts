@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -11,12 +11,11 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: "É necessário fornecer um e-mail e uma senha." },
         { status: 400 }
       );
     }
 
-    // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
       select: {
@@ -25,38 +24,35 @@ export async function POST(request: NextRequest) {
         email: true,
         passwordHash: true,
         role: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: "E-mail ou senha inválidos" },
         { status: 401 }
       );
     }
 
-    // Verify password
     const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!passwordMatch) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: "E-mail ou senha inválidos" },
         { status: 401 }
       );
     }
-
-    // Return user data without password
     const { passwordHash, ...userWithoutPassword } = user;
 
     return NextResponse.json({
       user: userWithoutPassword,
-      message: 'Login successful'
+      message: "Login bem-sucedido",
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Erro de login:", error);
     return NextResponse.json(
-      { error: 'An error occurred during login' },
+      { error: "Ocorreu um erro durante o login" },
       { status: 500 }
     );
   }
