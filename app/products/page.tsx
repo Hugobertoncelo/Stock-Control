@@ -631,6 +631,10 @@ export default function ProductsPage() {
     }
   };
 
+  const sortedProducts = [...products].sort((a, b) =>
+    a.productName.localeCompare(b.productName, "pt-BR", { sensitivity: "base" })
+  );
+
   return (
     <div className="min-h-screen">
       {message && (
@@ -786,12 +790,12 @@ export default function ProductsPage() {
                   />
                 </svg>
               </span>
-              <span>Todos os Produtos ({products.length})</span>
+              <span>Todos os Produtos ({sortedProducts.length})</span>
             </h2>
           </div>
 
           <ProductsTable
-            products={products}
+            products={sortedProducts}
             loading={loading}
             isLowStock={isLowStock}
             onProductClick={openProductDetails}
