@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activityLogger";
 
-// PUT update warehouse
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -16,7 +15,7 @@ export async function PUT(
 
     if (!warehouseName) {
       return NextResponse.json(
-        { error: "Warehouse name is required" },
+        { error: "O nome da loja é obrigatório" },
         { status: 400 }
       );
     }
@@ -29,14 +28,13 @@ export async function PUT(
       },
     });
 
-    // Log activity
     if (userId) {
       await logActivity({
         userId: parseInt(userId),
         action: "UPDATE",
         entityType: "WAREHOUSE",
         entityId: warehouseId,
-        details: `Updated warehouse: ${warehouseName}`,
+        details: `Loja atualizada: ${warehouseName}`,
       });
     }
 
@@ -45,11 +43,11 @@ export async function PUT(
       data: warehouse,
     });
   } catch (error: any) {
-    console.error("Error updating warehouse:", error);
+    console.error("Erro ao atualizar loja:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to update warehouse",
+        error: "Falha ao atualizar loja",
         message: error.message,
       },
       { status: 500 }
@@ -66,7 +64,6 @@ export async function DELETE(
     const { id } = await params;
     const warehouseId = parseInt(id);
 
-    // Check if warehouse has products
     const warehouse = await prisma.warehouse.findUnique({
       where: { warehouseId },
       include: {
@@ -78,7 +75,7 @@ export async function DELETE(
 
     if (!warehouse) {
       return NextResponse.json(
-        { error: "Warehouse not found" },
+        { error: "Loja não encontrada" },
         { status: 404 }
       );
     }
@@ -86,7 +83,7 @@ export async function DELETE(
     if (warehouse._count.products > 0) {
       return NextResponse.json(
         {
-          error: `Cannot delete warehouse with ${warehouse._count.products} products. Please move or delete all products first.`,
+          error: `Não é possível excluir a loja com ${warehouse._count.products} produtos. Mova ou exclua todos os produtos primeiro.`,
         },
         { status: 400 }
       );
@@ -96,27 +93,26 @@ export async function DELETE(
       where: { warehouseId },
     });
 
-    // Log activity
     if (userId) {
       await logActivity({
         userId: parseInt(userId),
         action: "DELETE",
         entityType: "WAREHOUSE",
         entityId: warehouseId,
-        details: `Deleted warehouse: ${warehouse.warehouseName}`,
+        details: `Loja excluída: ${warehouse.warehouseName}`,
       });
     }
 
     return NextResponse.json({
       success: true,
-      message: "Warehouse deleted successfully",
+      message: "Loja excluída com sucesso",
     });
   } catch (error: any) {
-    console.error("Error deleting warehouse:", error);
+    console.error("Erro ao excluir loja:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to delete warehouse",
+        error: "Falha ao excluir loja",
         message: error.message,
       },
       { status: 500 }

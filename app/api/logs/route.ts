@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,15 +13,15 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
-      take: 100, // Limit to last 100 logs
+      orderBy: { createdAt: "desc" },
+      take: 100,
     });
 
     return NextResponse.json(logs);
   } catch (error) {
-    console.error('Error fetching activity logs:', error);
+    console.error("Erro ao buscar logs de atividade:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch activity logs' },
+      { error: "Falha ao buscar logs de atividade" },
       { status: 500 }
     );
   }

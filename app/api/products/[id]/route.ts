@@ -74,19 +74,17 @@ export async function PUT(
       warehouseId,
     } = body;
 
-    // Check if product exists
     const existingProduct = await prisma.product.findUnique({
       where: { productId },
     });
 
     if (!existingProduct) {
       return NextResponse.json(
-        { success: false, error: "Product not found" },
+        { success: false, error: "Produto não encontrado" },
         { status: 404 }
       );
     }
 
-    // Check if SKU is being changed and if it conflicts with another product
     if (sku && sku !== existingProduct.sku) {
       const skuConflict = await prisma.product.findUnique({
         where: { sku },
@@ -94,7 +92,7 @@ export async function PUT(
 
       if (skuConflict) {
         return NextResponse.json(
-          { success: false, error: "Product with this SKU already exists" },
+          { success: false, error: "Produto com este SKU já existe" },
           { status: 409 }
         );
       }
@@ -125,14 +123,14 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       data: product,
-      message: "Product updated successfully",
+      message: "Produto atualizado com sucesso",
     });
   } catch (error: any) {
-    console.error("Error updating product:", error);
+    console.error("Erro ao atualizar produto:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to update product",
+        error: "Falha ao atualizar produto",
         message: error.message,
       },
       { status: 500 }
@@ -147,25 +145,23 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // Validate that id is a valid number
     const productId = parseInt(id);
     if (isNaN(productId)) {
       return NextResponse.json(
-        { success: false, error: "Invalid product ID" },
+        { success: false, error: "ID do produto inválido" },
         { status: 400 }
       );
     }
 
     const userId = request.headers.get("x-user-id");
 
-    // Check if product exists
     const existingProduct = await prisma.product.findUnique({
       where: { productId },
     });
 
     if (!existingProduct) {
       return NextResponse.json(
-        { success: false, error: "Product not found" },
+        { success: false, error: "Produto não encontrado" },
         { status: 404 }
       );
     }
@@ -174,26 +170,25 @@ export async function DELETE(
       where: { productId },
     });
 
-    // Log activity
     await logActivity({
       userId: userId ? parseInt(userId) : null,
       action: "DELETE",
       entityType: "PRODUCT",
       entityId: productId,
       entityName: existingProduct.productName,
-      details: `Deleted product: ${existingProduct.productName} (SKU: ${existingProduct.sku})`,
+      details: `Produto excluído: ${existingProduct.productName} (Código: ${existingProduct.sku})`,
     });
 
     return NextResponse.json({
       success: true,
-      message: "Product deleted successfully",
+      message: "Produto excluído com sucesso",
     });
   } catch (error: any) {
-    console.error("Error deleting product:", error);
+    console.error("Erro ao excluir produto:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to delete product",
+        error: "Falha ao excluir produto",
         message: error.message,
       },
       { status: 500 }

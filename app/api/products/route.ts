@@ -1,37 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { logActivity } from '@/lib/activityLogger';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { logActivity } from "@/lib/activityLogger";
 
-// GET all products with optional search and filter
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const search = searchParams.get('search') || '';
-    const category = searchParams.get('category') || '';
-    const warehouseId = searchParams.get('warehouseId');
-    const supplierId = searchParams.get('supplierId');
+    const search = searchParams.get("search") || "";
+    const category = searchParams.get("category") || "";
+    const warehouseId = searchParams.get("warehouseId");
+    const supplierId = searchParams.get("supplierId");
 
     const where: any = {};
 
-    // Search by name or SKU
     if (search) {
       where.OR = [
-        { productName: { contains: search, mode: 'insensitive' } },
-        { sku: { contains: search, mode: 'insensitive' } },
+        { productName: { contains: search, mode: "insensitive" } },
+        { sku: { contains: search, mode: "insensitive" } },
       ];
     }
 
-    // Filter by category
     if (category) {
       where.category = category;
     }
 
-    // Filter by warehouse
     if (warehouseId) {
       where.warehouseId = parseInt(warehouseId);
     }
 
-    // Filter by supplier
     if (supplierId) {
       where.supplierId = parseInt(supplierId);
     }
@@ -49,7 +44,7 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: {
-        productId: 'desc',
+        productId: "desc",
       },
     });
 
@@ -59,15 +54,18 @@ export async function GET(request: NextRequest) {
       count: products.length,
     });
   } catch (error: any) {
-    console.error('Error fetching products:', error);
+    console.error("Erro ao buscar produtos:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch products', message: error.message },
+      {
+        success: false,
+        error: "Falha ao buscar produtos",
+        message: error.message,
+      },
       { status: 500 }
     );
   }
 }
 
-// POST - Create new product
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -84,22 +82,23 @@ export async function POST(request: NextRequest) {
       createdBy,
     } = body;
 
-    // Validation
     if (!productName || !sku || !unitPrice) {
       return NextResponse.json(
-        { success: false, error: 'Product name, SKU, and price are required' },
+        {
+          success: false,
+          error: "É necessário informar o nome do produto, o código e o preço.",
+        },
         { status: 400 }
       );
     }
 
-    // Check if SKU already exists
     const existingProduct = await prisma.product.findUnique({
       where: { sku },
     });
 
     if (existingProduct) {
       return NextResponse.json(
-        { success: false, error: 'Product with this SKU already exists' },
+        { success: false, error: "Produto com este SKU já existe" },
         { status: 409 }
       );
     }
@@ -129,24 +128,27 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Log activity
     await logActivity({
       userId: createdBy ? parseInt(createdBy) : null,
-      action: 'CREATE',
-      entityType: 'PRODUCT',
+      action: "CREATE",
+      entityType: "PRODUCT",
       entityId: product.productId,
       entityName: product.productName,
-      details: `Created product: ${product.productName} (SKU: ${product.sku})`,
+      details: `Produto criado: ${product.productName} (Código: ${product.sku})`,
     });
 
     return NextResponse.json(
-      { success: true, data: product, message: 'Product created successfully' },
+      { success: true, data: product, message: "Produto criado com sucesso" },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('Error creating product:', error);
+    console.error("Erro ao criar o produto:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create product', message: error.message },
+      {
+        success: false,
+        error: "Falha ao criar o produto",
+        message: error.message,
+      },
       { status: 500 }
     );
   }

@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET dashboard statistics
 export async function GET(request: NextRequest) {
   try {
-    // Get total products count
     const totalProducts = await prisma.product.count();
 
     const products = await prisma.product.findMany({
@@ -21,8 +19,6 @@ export async function GET(request: NextRequest) {
       0
     );
 
-    // Get low stock products (quantity <= minimum + 10% of (max - min))
-    // Formula: current stock <= min + ((max - min) * 0.10)
     const allProducts = await prisma.product.findMany({
       select: {
         productId: true,
@@ -55,7 +51,6 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Get total stock quantity
     const totalStockQuantity = products.reduce(
       (sum: number, product: { quantity: number; unitPrice: any }) => {
         return sum + product.quantity;
@@ -63,7 +58,6 @@ export async function GET(request: NextRequest) {
       0
     );
 
-    // Recent stock movements
     const recentStockMovements = await prisma.stockMovement.findMany({
       take: 10,
       orderBy: {
@@ -74,7 +68,6 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Calculate profit/loss for last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -88,7 +81,6 @@ export async function GET(request: NextRequest) {
       orderBy: { saleDate: "asc" },
     });
 
-    // Calculate profit using stored cost of goods sold
     const profitData = recentSales.map((sale) => {
       const costOfGoodsSold = sale.costOfGoodsSold
         ? parseFloat(sale.costOfGoodsSold.toString())
@@ -104,7 +96,6 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Group by date and sum profits
     const dailyProfitMap = new Map();
     profitData.forEach((item) => {
       if (dailyProfitMap.has(item.date)) {
@@ -137,11 +128,11 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("Error fetching dashboard stats:", error);
+    console.error("Erro ao buscar estatísticas do painel:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch dashboard statistics",
+        error: "Falha ao buscar estatísticas do painel",
         message: error.message,
       },
       { status: 500 }

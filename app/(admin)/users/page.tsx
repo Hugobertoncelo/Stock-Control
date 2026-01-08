@@ -235,7 +235,7 @@ export default function UsersPage() {
                     Funcionários
                   </h3>
                   <p className="text-4xl font-bold text-gray-900 mt-3">
-                    {users.filter((u) => u.role === "staff").length}
+                    {users.filter((u) => u.role === "funcionário").length}
                   </p>
                 </div>
                 <div className="p-3 rounded-xl bg-purple-600/80 backdrop-blur-sm shadow-lg shadow-purple-500/20 text-white transform group-hover:rotate-12 transition-transform duration-300 border border-purple-500/30">
@@ -480,10 +480,10 @@ export default function UsersPage() {
                   <select
                     id="userRole"
                     name="role"
-                    defaultValue="staff"
+                    defaultValue="funcionário"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
                   >
-                    <option value="staff">Funcionário</option>
+                    <option value="funcionário">Funcionário</option>
                     <option value="admin">Administrador</option>
                   </select>
                 </div>

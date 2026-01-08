@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const productId = searchParams.get('productId');
+    const productId = searchParams.get("productId");
 
     if (!productId) {
       return NextResponse.json(
-        { error: 'Product ID is required' },
+        { error: "O ID do produto é obrigatório" },
         { status: 400 }
       );
     }
@@ -24,14 +24,14 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: { batchDate: 'desc' },
+      orderBy: { batchDate: "desc" },
     });
 
     return NextResponse.json(stockBatches);
   } catch (error) {
-    console.error('Error fetching stock batches:', error);
+    console.error("Erro ao obter os lotes de estoque:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch stock batches' },
+      { error: "Falha ao obter os lotes de estoque" },
       { status: 500 }
     );
   }

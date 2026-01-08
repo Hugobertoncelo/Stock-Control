@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcrypt';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcrypt";
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,39 +8,36 @@ export async function POST(request: NextRequest) {
 
     if (!token || !newPassword) {
       return NextResponse.json(
-        { error: 'Token and new password are required' },
+        { error: "É necessário um token e uma nova senha." },
         { status: 400 }
       );
     }
 
     if (newPassword.length < 6) {
       return NextResponse.json(
-        { error: 'Password must be at least 6 characters long' },
+        { error: "A nova senha deve ter pelo menos 6 caracteres." },
         { status: 400 }
       );
     }
 
-    // Find user with valid reset token
     const user = await prisma.user.findFirst({
       where: {
         resetToken: token,
         resetTokenExpiry: {
-          gte: new Date(), // Token not expired
+          gte: new Date(),
         },
       },
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Invalid or expired reset token' },
+        { error: "Token de redefinição inválido ou expirado" },
         { status: 400 }
       );
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update user password and clear reset token
     await prisma.user.update({
       where: { userId: user.userId },
       data: {
@@ -51,13 +48,13 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { message: 'Password has been reset successfully' },
+      { message: "A senha foi redefinida com sucesso" },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('Error resetting password:', error);
+    console.error("Erro ao redefinir a senha:", error);
     return NextResponse.json(
-      { error: 'An error occurred while resetting your password' },
+      { error: "Ocorreu um erro ao redefinir sua senha" },
       { status: 500 }
     );
   }

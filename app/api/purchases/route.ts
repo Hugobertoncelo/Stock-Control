@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { logActivity } from '@/lib/activityLogger';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const productId = searchParams.get('productId');
+    const productId = searchParams.get("productId");
 
     const where = productId ? { productId: parseInt(productId) } : {};
 
@@ -21,14 +21,14 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: { purchaseDate: 'desc' },
+      orderBy: { purchaseDate: "desc" },
     });
 
     return NextResponse.json(purchases);
   } catch (error) {
-    console.error('Error fetching purchases:', error);
+    console.error("Erro ao buscar compras:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch purchases' },
+      { error: "Falha ao buscar compras" },
       { status: 500 }
     );
   }
@@ -45,24 +45,21 @@ export async function POST(request: NextRequest) {
       createdBy,
     } = body;
 
-    // Validation
     if (!supplierId || !productId || !purchasedQuantity || !purchasePrice) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: "Todos os campos são obrigatórios" },
         { status: 400 }
       );
     }
 
     if (purchasedQuantity <= 0) {
       return NextResponse.json(
-        { error: 'Quantity must be greater than 0' },
+        { error: "A quantidade deve ser maior que 0." },
         { status: 400 }
       );
     }
 
-    // Create purchase and update product stock in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Create purchase record
       const purchase = await tx.purchase.create({
         data: {
           supplierId: parseInt(supplierId),
@@ -77,7 +74,6 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Update product stock quantity
       await tx.product.update({
         where: { productId: parseInt(productId) },
         data: {
@@ -87,18 +83,16 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Create stock movement record
       await tx.stockMovement.create({
         data: {
           productId: parseInt(productId),
           quantity: parseInt(purchasedQuantity),
-          type: 'IN',
+          type: "IN",
           reference: `Purchase #${purchase.purchaseId}`,
           userId: createdBy ? parseInt(createdBy) : null,
         },
       });
 
-      // Create stock batch for FIFO tracking
       await tx.stockBatch.create({
         data: {
           productId: parseInt(productId),
@@ -112,21 +106,20 @@ export async function POST(request: NextRequest) {
       return purchase;
     });
 
-    // Log activity
     await logActivity({
       userId: createdBy ? parseInt(createdBy) : null,
-      action: 'CREATE',
-      entityType: 'PURCHASE',
+      action: "CREATE",
+      entityType: "PURCHASE",
       entityId: result.purchaseId,
-      entityName: `${result.product.productName} from ${result.supplier.supplierName}`,
-      details: `Recorded purchase: ${purchasedQuantity} units of ${result.product.productName} from ${result.supplier.supplierName} at $${purchasePrice}/unit`,
+      entityName: `${result.product.productName} de ${result.supplier.supplierName}`,
+      details: `Compra registrada: ${purchasedQuantity} unidades de ${result.product.productName} from ${result.supplier.supplierName} at $${purchasePrice}/unit`,
     });
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    console.error('Error creating purchase:', error);
+    console.error("Erro ao criar a compra:", error);
     return NextResponse.json(
-      { error: 'Failed to create purchase' },
+      { error: "Falha ao criar a compra" },
       { status: 500 }
     );
   }

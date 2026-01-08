@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -13,21 +13,20 @@ export async function DELETE(
 
     if (isNaN(userId)) {
       return NextResponse.json(
-        { error: 'Invalid user ID' },
+        { error: "ID de usuário inválido" },
         { status: 400 }
       );
     }
 
-    // Delete user
     await prisma.user.delete({
-      where: { userId }
+      where: { userId },
     });
 
-    return NextResponse.json({ message: 'User deleted successfully' });
+    return NextResponse.json({ message: "Usuário excluído com sucesso" });
   } catch (error) {
-    console.error('Error deleting user:', error);
+    console.error("Erro ao excluir usuário:", error);
     return NextResponse.json(
-      { error: 'Failed to delete user' },
+      { error: "Falha ao excluir usuário" },
       { status: 500 }
     );
   }

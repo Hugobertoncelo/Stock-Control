@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-// PATCH - Update stock quantity (add or remove stock)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -9,11 +8,15 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { quantity, type } = body; // type: 'add' or 'remove'
+    const { quantity, type } = body;
 
     if (!quantity || !type) {
       return NextResponse.json(
-        { success: false, error: 'Quantity and type (add/remove) are required' },
+        {
+          success: false,
+          error:
+            "É necessário informar a quantidade e o tipo (adicionar/remover)",
+        },
         { status: 400 }
       );
     }
@@ -22,43 +25,41 @@ export async function PATCH(
 
     if (quantityNum <= 0) {
       return NextResponse.json(
-        { success: false, error: 'Quantity must be greater than 0' },
+        { success: false, error: "A quantidade deve ser maior que 0" },
         { status: 400 }
       );
     }
 
-    // Get current product
     const product = await prisma.product.findUnique({
       where: { productId: parseInt(id) },
     });
 
     if (!product) {
       return NextResponse.json(
-        { success: false, error: 'Product not found' },
+        { success: false, error: "Produto não encontrado" },
         { status: 404 }
       );
     }
 
     let newQuantity = product.quantity;
 
-    if (type === 'add') {
+    if (type === "add") {
       newQuantity += quantityNum;
-    } else if (type === 'remove') {
+    } else if (type === "remove") {
       if (product.quantity < quantityNum) {
         return NextResponse.json(
-          { success: false, error: 'Insufficient stock quantity' },
+          { success: false, error: "Quantidade de estoque insuficiente" },
           { status: 400 }
         );
       }
       newQuantity -= quantityNum;
     } else {
       return NextResponse.json(
-        { success: false, error: 'Invalid type. Use "add" or "remove"' },
+        { success: false, error: 'Tipo inválido. Use "add" ou "remove"' },
         { status: 400 }
       );
     }
 
-    // Update product quantity and create stock movement
     const [updatedProduct] = await prisma.$transaction([
       prisma.product.update({
         where: { productId: parseInt(id) },
@@ -69,8 +70,8 @@ export async function PATCH(
         data: {
           productId: parseInt(id),
           quantity: quantityNum,
-          type: type === 'add' ? 'IN' : 'OUT',
-          reference: `Manual ${type === 'add' ? 'addition' : 'removal'}`,
+          type: type === "add" ? "IN" : "OUT",
+          reference: `Manual ${type === "add" ? "adicionado" : "removido"}`,
         },
       }),
     ]);
@@ -78,12 +79,18 @@ export async function PATCH(
     return NextResponse.json({
       success: true,
       data: updatedProduct,
-      message: `Stock ${type === 'add' ? 'added' : 'removed'} successfully`,
+      message: `Estoque ${
+        type === "add" ? "adicionado" : "removido"
+      } com sucesso`,
     });
   } catch (error: any) {
-    console.error('Error updating stock:', error);
+    console.error("Erro ao atualizar estoque:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update stock', message: error.message },
+      {
+        success: false,
+        error: "Falha ao atualizar estoque",
+        message: error.message,
+      },
       { status: 500 }
     );
   }
