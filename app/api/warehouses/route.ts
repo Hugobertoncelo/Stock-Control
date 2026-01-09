@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     if (!warehouseName) {
       return NextResponse.json(
-        { error: "O nome do armazém é obrigatório" },
+        { error: "O nome do tamanho é obrigatório" },
         { status: 400 }
       );
     }
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         action: "CREATE",
         entityType: "WAREHOUSE",
         entityId: warehouse.warehouseId,
-        details: `Cor criada: ${warehouseName}`,
+        details: `Tamanho criado: ${warehouseName}`,
       });
     }
 
@@ -72,9 +72,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Erro ao criar cor:", error);
+    console.error("Erro ao criar tamanho:", error);
     return NextResponse.json(
-      { error: "Falha ao criar cor", message: error.message },
+      { error: "Falha ao criar tamanho", message: error.message },
       { status: 500 }
     );
   }

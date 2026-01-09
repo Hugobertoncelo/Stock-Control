@@ -86,15 +86,15 @@ export default function WarehousesPage() {
         setFormData({ warehouseName: "", location: "" });
         toast.success(
           editingWarehouse
-            ? "Cor atualizada com sucesso!"
-            : "Cor criada com sucesso!"
+            ? "Tamanho atualizado com sucesso!"
+            : "Tamanho criado com sucesso!"
         );
       } else {
         const error = await response.json();
-        toast.error(error.error || "Falha ao salvar cor");
+        toast.error(error.error || "Falha ao salvar tamanho");
       }
     } catch (error) {
-      console.error("Erro ao salvar a cor:", error);
+      console.error("Erro ao salvar o tamanho:", error);
       toast.error("Ocorreu um erro. Por favor, tente novamente.");
     } finally {
       setLoading(false);
@@ -132,15 +132,15 @@ export default function WarehousesPage() {
 
       if (response.ok) {
         await fetchWarehouses();
-        toast.success("Cor excluída com sucesso!");
+        toast.success("Tamanho excluído com sucesso!");
         setShowDeleteModal(false);
         setWarehouseToDelete(null);
       } else {
         const error = await response.json();
-        toast.error(error.error || "Falha ao excluir cor");
+        toast.error(error.error || "Falha ao excluir tamanho");
       }
     } catch (error) {
-      console.error("Erro ao excluir cor:", error);
+      console.error("Erro ao excluir tamanho:", error);
       toast.error("Ocorreu um erro. Por favor, tente novamente.");
     } finally {
       setLoading(false);
@@ -160,10 +160,10 @@ export default function WarehousesPage() {
           <div className="flex justify-center items-center">
             <div className="text-center">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Gerenciamento de Cores
+                Gerenciamento de Tamanhos
               </h1>
               <p className="text-gray-600 mt-1">
-                Gerencie suas cores de armazenamento
+                Gerencie seus tamanhos de armazenamento
               </p>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function WarehousesPage() {
         <div className="bg-gradient-to-br from-yellow-50/60 to-amber-50/40 backdrop-blur-md rounded-2xl shadow-2xl hover:shadow-3xl border border-yellow-200/50 p-6 mb-8 transition-shadow duration-300">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <h3 className="text-lg font-semibold text-yellow-900">
-              Painel de Cores
+              Painel de Tamanhos
             </h3>
             <button
               onClick={openAddModal}
@@ -193,7 +193,7 @@ export default function WarehousesPage() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              Adicionar Cor
+              Adicionar Tamanho
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -203,7 +203,7 @@ export default function WarehousesPage() {
               <div className="relative flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-yellow-700 uppercase tracking-wide">
-                    Total de Cores
+                    Total de Tamanhos
                   </h3>
                   <p className="text-4xl font-bold text-gray-900 mt-3">
                     {warehouses.length}
@@ -264,7 +264,7 @@ export default function WarehousesPage() {
               <div className="relative flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-yellow-700 uppercase tracking-wide">
-                    Produtos médios/Cor
+                    Produtos médios/Tamanho
                   </h3>
                   <p className="text-4xl font-bold text-gray-900 mt-3">
                     {warehouses.length > 0
@@ -313,7 +313,7 @@ export default function WarehousesPage() {
                   d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                 />
               </svg>
-              Todas as Cores
+              Todas as Tamanhos
             </h2>
           </div>
 
@@ -324,13 +324,13 @@ export default function WarehousesPage() {
           ) : warehouses.length === 0 ? (
             <div className="text-center py-12 bg-white/40">
               <p className="text-gray-700 font-semibold">
-                Nenhuma cor encontrada
+                Nenhum tamanho encontrado
               </p>
               <button
                 onClick={openAddModal}
                 className="mt-4 px-6 py-2 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl hover:from-gray-800 hover:to-gray-700 font-semibold shadow-lg transition-all duration-300"
               >
-                Adicionar Primeira Cor
+                Adicionar Primeiro Tamanho
               </button>
             </div>
           ) : (
@@ -455,7 +455,7 @@ export default function WarehousesPage() {
                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                   />
                 </svg>
-                {editingWarehouse ? "Editar Cor" : "Adicionar Novo Cor"}
+                {editingWarehouse ? "Editar Tamanho" : "Adicionar Novo Tamanho"}
               </h2>
             </div>
 
@@ -466,7 +466,7 @@ export default function WarehousesPage() {
                     htmlFor="warehouseName"
                     className="block text-sm font-bold text-gray-700 mb-2"
                   >
-                    Nome da Cor *
+                    Nome do Tamanho *
                   </label>
                   <input
                     type="text"
@@ -476,7 +476,7 @@ export default function WarehousesPage() {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
-                    placeholder="Exemplo: Cor Principal"
+                    placeholder="Exemplo: Tamanho Principal"
                   />
                 </div>
 
@@ -508,9 +508,9 @@ export default function WarehousesPage() {
                   {loading ? (
                     <LoadingDots />
                   ) : editingWarehouse ? (
-                    "Atualizar Cor"
+                    "Atualizar Tamanho"
                   ) : (
-                    "Adicionar Cor"
+                    "Adicionar Tamanho"
                   )}
                 </button>
                 <button

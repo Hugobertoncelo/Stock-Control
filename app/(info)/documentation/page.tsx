@@ -111,7 +111,7 @@ export default function DocumentationPage() {
       "Gerenciamento de Produtos com geração e categorização de SKU",
       "Gerenciamento de Compras com criação automática de lotes de estoque",
       "Gerenciamento de Vendas com cálculo de custo FIFO",
-      "Suporte a Múltiplas Cores com níveis de estoque em tempo real",
+      "Suporte a Múltiplos Tamanhos com níveis de estoque em tempo real",
       "Rastreamento de Movimentação de Estoque com trilhas de auditoria completas",
       "Gerenciamento de Clientes e Fornecedores com histórico de transações",
       "Gerenciamento de Usuários com controle de acesso baseado em funções",
@@ -1016,7 +1016,7 @@ export default function DocumentationPage() {
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <Home className="w-5 h-5 text-yellow-600" />
-                    Cores
+                    Tamanhos
                   </h4>
                   <div className="space-y-3">
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -1043,7 +1043,7 @@ export default function DocumentationPage() {
                         </code>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">
-                        Crie uma nova cor
+                        Crie um novo tamanho
                       </p>
                       <div className="text-xs">
                         <strong>Request:</strong>
@@ -1064,7 +1064,7 @@ export default function DocumentationPage() {
                         </code>
                       </div>
                       <p className="text-sm text-gray-600">
-                        Atualizar informações da cor
+                        Atualizar informações do tamanho
                       </p>
                     </div>
 
@@ -1077,7 +1077,9 @@ export default function DocumentationPage() {
                           /api/warehouses/[id]
                         </code>
                       </div>
-                      <p className="text-sm text-gray-600">Excluir uma cor</p>
+                      <p className="text-sm text-gray-600">
+                        Excluir um tamanho
+                      </p>
                     </div>
                   </div>
                 </div>

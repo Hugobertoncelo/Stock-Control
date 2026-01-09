@@ -1200,27 +1200,21 @@ export default function PurchasesPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Tamanho
+                    Cor
                   </label>
-                  <div className="flex gap-2">
-                    <select
-                      value={newProductForm.category}
-                      onChange={(e) =>
-                        setNewProductForm({
-                          ...newProductForm,
-                          category: e.target.value,
-                        })
-                      }
-                      title="Selecione um tamanho"
-                      className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                    >
-                      <option value="">Selecionar Tamanho</option>
-                      <option value="pequeno">Pequeno</option>
-                      <option value="medio">Médio</option>
-                      <option value="grande">Grande</option>
-                      <option value="extra-grande">Extra Grande</option>
-                    </select>
-                  </div>
+                  <input
+                    type="text"
+                    value={newProductForm.category}
+                    onChange={(e) =>
+                      setNewProductForm({
+                        ...newProductForm,
+                        category: e.target.value,
+                      })
+                    }
+                    title="Digite a cor do produto"
+                    className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                    placeholder="Digite a cor"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -1245,7 +1239,7 @@ export default function PurchasesPage() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Cor *
+                    Tamanho *
                   </label>
                   <select
                     value={newProductForm.warehouseId}
@@ -1256,10 +1250,10 @@ export default function PurchasesPage() {
                       })
                     }
                     required
-                    title="Selecione uma Cor"
+                    title="Selecione um Tamanho"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
                   >
-                    <option value="">Selecionar Cor</option>
+                    <option value="">Selecionar Tamanho</option>
                     {warehouses.map((w) => (
                       <option key={w.warehouseId} value={w.warehouseId}>
                         {w.warehouseName}

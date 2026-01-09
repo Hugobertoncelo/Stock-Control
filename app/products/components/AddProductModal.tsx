@@ -441,25 +441,18 @@ export default function AddProductModal({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Tamanho
+                Cor
               </label>
-              <div className="flex gap-2">
-                <select
-                  value={form.category}
-                  onChange={(e) =>
-                    onFormChange({ ...form, category: e.target.value })
-                  }
-                  title="Selecione um tamanho"
-                  className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                >
-                  <option value="">Selecionar Tamanho</option>
-                  <option value="solteiro">Solteiro</option>
-                  <option value="casal">Casal</option>
-                  <option value="queen">Queen</option>
-                  <option value="king">King</option>
-                  <option value="super-king">Super King</option>
-                </select>
-              </div>
+              <input
+                type="text"
+                value={form.category}
+                onChange={(e) =>
+                  onFormChange({ ...form, category: e.target.value })
+                }
+                title="Digite a cor do produto"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                placeholder="Digite a cor"
+              />
             </div>
 
             <div>
@@ -482,7 +475,7 @@ export default function AddProductModal({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Cor *
+                Tamanho *
               </label>
               <div className="flex gap-2">
                 <select
@@ -491,10 +484,10 @@ export default function AddProductModal({
                     onFormChange({ ...form, warehouseId: e.target.value })
                   }
                   required
-                  title="Selecione uma cor"
+                  title="Selecione um tamanho"
                   className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 >
-                  <option value="">Selecionar Cor</option>
+                  <option value="">Selecionar Tamanho</option>
                   {warehouses.map((w) => (
                     <option key={w.warehouseId} value={w.warehouseId}>
                       {w.warehouseName}
@@ -505,7 +498,7 @@ export default function AddProductModal({
                   type="button"
                   onClick={onAddWarehouse}
                   className="px-4 py-3 bg-blue-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-blue-700/90 active:bg-blue-800 font-semibold whitespace-nowrap shadow-lg hover:shadow-xl active:shadow-2xl transition-all duration-300 border border-blue-500/30 active:border-blue-600"
-                  title="Adicionar nova cor"
+                  title="Adicionar novo tamanho"
                 >
                   + Adicionar
                 </button>

@@ -19,7 +19,7 @@ export default function FAQPage() {
       category: "Começando",
       question: "Como adiciono um novo produto ao inventário?",
       answer:
-        'Navegue até a página de Produtos e clique no botão "Adicionar Produto". Preencha os campos obrigatórios, incluindo nome do produto, SKU, preços e níveis de quantidade. Selecione uma cor e um fornecedor, e clique em Salvar. O produto estará imediatamente disponível em seu inventário.',
+        'Navegue até a página de Produtos e clique no botão "Adicionar Produto". Preencha os campos obrigatórios, incluindo nome do produto, SKU, preços e níveis de quantidade. Selecione um tamanho e um fornecedor, e clique em Salvar. O produto estará imediatamente disponível em seu inventário.',
     },
     {
       category: "Começando",
@@ -35,9 +35,9 @@ export default function FAQPage() {
     },
     {
       category: "Gerenciamento de Inventário",
-      question: "Como faço para rastrear o estoque em várias cores?",
+      question: "Como faço para rastrear o estoque em vários tamanhos?",
       answer:
-        "Cada produto pode ser atribuído a uma cor específica. Ao visualizar a página de Produtos, você pode filtrar por cor para ver os níveis de estoque de cada local. O sistema rastreia o inventário separadamente para cada cor e fornece contagens de estoque em tempo real.",
+        "Cada produto pode ser atribuído a um tamanho específico. Ao visualizar a página de Produtos, você pode filtrar por tamanho para ver os níveis de estoque de cada local. O sistema rastreia o inventário separadamente para cada tamanho e fornece contagens de estoque em tempo real.",
     },
     {
       category: "Gerenciamento de Inventário",

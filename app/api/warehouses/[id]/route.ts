@@ -15,7 +15,7 @@ export async function PUT(
 
     if (!warehouseName) {
       return NextResponse.json(
-        { error: "O nome da cor é obrigatório" },
+        { error: "O nome do tamanho é obrigatório" },
         { status: 400 }
       );
     }
@@ -34,7 +34,7 @@ export async function PUT(
         action: "UPDATE",
         entityType: "WAREHOUSE",
         entityId: warehouseId,
-        details: `Cor atualizada: ${warehouseName}`,
+        details: `Tamanho atualizado: ${warehouseName}`,
       });
     }
 
@@ -43,11 +43,11 @@ export async function PUT(
       data: warehouse,
     });
   } catch (error: any) {
-    console.error("Erro ao atualizar cor:", error);
+    console.error("Erro ao atualizar tamanho:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Falha ao atualizar cor",
+        error: "Falha ao atualizar tamanho",
         message: error.message,
       },
       { status: 500 }
@@ -75,7 +75,7 @@ export async function DELETE(
 
     if (!warehouse) {
       return NextResponse.json(
-        { error: "Cor não encontrada" },
+        { error: "Tamanho não encontrada" },
         { status: 404 }
       );
     }
@@ -83,7 +83,7 @@ export async function DELETE(
     if (warehouse._count.products > 0) {
       return NextResponse.json(
         {
-          error: `Não é possível excluir a cor com ${warehouse._count.products} produtos. Mova ou exclua todos os produtos primeiro.`,
+          error: `Não é possível excluir o tamanho com ${warehouse._count.products} produtos. Mova ou exclua todos os produtos primeiro.`,
         },
         { status: 400 }
       );
@@ -99,20 +99,20 @@ export async function DELETE(
         action: "DELETE",
         entityType: "WAREHOUSE",
         entityId: warehouseId,
-        details: `Cor excluída: ${warehouse.warehouseName}`,
+        details: `Tamanho excluído: ${warehouse.warehouseName}`,
       });
     }
 
     return NextResponse.json({
       success: true,
-      message: "Cor excluída com sucesso",
+      message: "Tamanho excluído com sucesso",
     });
   } catch (error: any) {
-    console.error("Erro ao excluir cor:", error);
+    console.error("Erro ao excluir tamanho:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Falha ao excluir cor",
+        error: "Falha ao excluir tamanho",
         message: error.message,
       },
       { status: 500 }

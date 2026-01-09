@@ -212,7 +212,7 @@ export default function NewProductPage() {
                   htmlFor="category"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Tamanho
+                  Cor
                 </label>
                 <input
                   type="text"
@@ -221,7 +221,7 @@ export default function NewProductPage() {
                   value={formData.category}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Por exemplo, eletrônicos, acessórios."
+                  placeholder="Por exemplo, azul, branco."
                 />
               </div>
 
@@ -310,7 +310,7 @@ export default function NewProductPage() {
                   htmlFor="warehouseId"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Cor
+                  Tamanho
                 </label>
                 <select
                   id="warehouseId"
@@ -319,7 +319,7 @@ export default function NewProductPage() {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">Selecionar Cor (Opcional)</option>
+                  <option value="">Selecionar Tamanho (Opcional)</option>
                   {warehouses.map((warehouse) => (
                     <option
                       key={warehouse.warehouseId}

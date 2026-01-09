@@ -118,23 +118,19 @@ export default function EditProductModal({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Tamanho *
+                Cor *
               </label>
-              <select
+              <input
+                type="text"
                 value={form.category}
                 onChange={(e) =>
                   onFormChange({ ...form, category: e.target.value })
                 }
                 required
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-gray-500 transition-all"
-                title="Selecione um tamanho"
-              >
-                <option value="">Selecionar Tamanho</option>
-                <option value="pequeno">Pequeno</option>
-                <option value="medio">Médio</option>
-                <option value="grande">Grande</option>
-                <option value="extra-grande">Extra Grande</option>
-              </select>
+                title="Digite a cor do produto"
+                placeholder="Digite a cor"
+              />
             </div>
 
             <div>
@@ -156,7 +152,7 @@ export default function EditProductModal({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Cor *
+                Tamanho *
               </label>
               <select
                 value={form.warehouseId}
@@ -164,10 +160,10 @@ export default function EditProductModal({
                   onFormChange({ ...form, warehouseId: e.target.value })
                 }
                 required
-                title="Selecione uma cor"
+                title="Selecione um tamanho"
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-gray-500 transition-all"
               >
-                <option value="">Select Warehouse</option>
+                <option value="">Selecionar Tamanho</option>
                 {warehouses.map((w) => (
                   <option key={w.warehouseId} value={w.warehouseId}>
                     {w.warehouseName}

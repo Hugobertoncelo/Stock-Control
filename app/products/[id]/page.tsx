@@ -272,7 +272,7 @@ export default function EditProductPage({
                       htmlFor="category"
                       className="block text-sm font-medium text-gray-900 mb-2"
                     >
-                      Tamanho
+                      Cor
                     </label>
                     <input
                       type="text"
@@ -370,7 +370,7 @@ export default function EditProductPage({
 
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                  Cor & Fornecedor
+                  Tamanho & Fornecedor
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -378,7 +378,7 @@ export default function EditProductPage({
                       htmlFor="warehouseId"
                       className="block text-sm font-medium text-gray-900 mb-2"
                     >
-                      Cor
+                      Tamanho
                     </label>
                     <select
                       id="warehouseId"
@@ -387,7 +387,7 @@ export default function EditProductPage({
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all bg-white"
                     >
-                      <option value="">Selecionar Cor (Opcional)</option>
+                      <option value="">Selecionar Tamanho (Opcional)</option>
                       {warehouses.map((warehouse) => (
                         <option
                           key={warehouse.warehouseId}

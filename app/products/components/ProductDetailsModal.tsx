@@ -183,7 +183,7 @@ export default function ProductDetailsModal({
               <p className="text-lg font-bold text-blue-900">{product.sku}</p>
             </div>
             <div className="bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm">
-              <p className="text-sm text-green-700 font-medium mb-1">Tamanho</p>
+              <p className="text-sm text-green-700 font-medium mb-1">Cor</p>
               <p className="text-lg font-bold text-green-900">
                 {product.category || "N/A"}
               </p>
@@ -240,7 +240,7 @@ export default function ProductDetailsModal({
               </p>
             </div>
             <div className="bg-pink-50 p-4 rounded-xl border border-pink-200 shadow-sm">
-              <p className="text-sm text-pink-700 font-medium mb-1">Cor</p>
+              <p className="text-sm text-pink-700 font-medium mb-1">Tamanho</p>
               <p className="text-lg font-bold text-gray-900">
                 {product.warehouse?.warehouseName || "N/A"}
               </p>
@@ -300,7 +300,7 @@ export default function ProductDetailsModal({
                     display: "block",
                   }}
                 >
-                  {user?.fullName ? user.fullName : "Minha Cor"}
+                  {user?.fullName ? user.fullName : "Meu Tamanho"}
                 </span>
 
                 <div
