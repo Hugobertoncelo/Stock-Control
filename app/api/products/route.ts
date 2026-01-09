@@ -42,16 +42,27 @@ export async function GET(request: NextRequest) {
             fullName: true,
           },
         },
+        photos: {
+          orderBy: { uploadedAt: "desc" },
+        },
       },
       orderBy: {
         productId: "desc",
       },
     });
 
+    const productsWithImage = products.map((product) => ({
+      ...product,
+      imageUrl:
+        product.photos && product.photos.length > 0
+          ? product.photos[0].photoId
+          : undefined,
+    }));
+
     return NextResponse.json({
       success: true,
-      data: products,
-      count: products.length,
+      data: productsWithImage,
+      count: productsWithImage.length,
     });
   } catch (error: any) {
     console.error("Erro ao buscar produtos:", error);

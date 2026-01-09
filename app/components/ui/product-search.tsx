@@ -16,8 +16,6 @@ interface ProductSearchProps {
 }
 
 function generateRefNumber(product: Product) {
-  // Gera um número de referência de 6 dígitos baseado no id e código
-  // Exemplo: concatena id + código (numérico) e preenche com zeros à esquerda
   const base = `${product.id}${product.code.replace(/\D/g, "")}`;
   return base.padStart(6, "0").slice(0, 6);
 }
@@ -65,7 +63,11 @@ export default function ProductSearch({ products }: ProductSearchProps) {
             >
               {product.imageUrl ? (
                 <img
-                  src={`/api/products/photo?productId=${Number(product.id)}`}
+                  src={
+                    product.imageUrl.startsWith("/api/")
+                      ? product.imageUrl
+                      : `/api/products/photos/image?id=${product.imageUrl}`
+                  }
                   alt={product.name}
                   className="w-12 h-12 object-cover rounded-md border bg-gray-100"
                   onError={(e) => (e.currentTarget.style.display = "none")}
@@ -106,7 +108,11 @@ export default function ProductSearch({ products }: ProductSearchProps) {
             <div className="flex flex-col items-center gap-3">
               {selected.imageUrl ? (
                 <img
-                  src={`/api/products/photo?productId=${Number(selected.id)}`}
+                  src={
+                    selected.imageUrl.startsWith("/api/")
+                      ? selected.imageUrl
+                      : `/api/products/photos/image?id=${selected.imageUrl}`
+                  }
                   alt={selected.name}
                   className="w-24 h-24 object-cover rounded-md border bg-gray-100"
                   onError={(e) => (e.currentTarget.style.display = "none")}

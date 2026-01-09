@@ -151,7 +151,10 @@ export default function FeaturedCrmDemoSection({
           name: p.productName,
           code: p.sku,
           price: Number(p.unitPrice),
-          imageUrl: `/api/products/photo?productId=${p.productId}`,
+          imageUrl:
+            p.photos && p.photos.length > 0
+              ? `/api/products/photos/image?id=${p.photos[0].photoId}`
+              : undefined,
         }));
         setProducts(productsWithImages);
       }
