@@ -183,9 +183,7 @@ export default function ProductDetailsModal({
               <p className="text-lg font-bold text-blue-900">{product.sku}</p>
             </div>
             <div className="bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm">
-              <p className="text-sm text-green-700 font-medium mb-1">
-                Categoria
-              </p>
+              <p className="text-sm text-green-700 font-medium mb-1">Tamanho</p>
               <p className="text-lg font-bold text-green-900">
                 {product.category || "N/A"}
               </p>

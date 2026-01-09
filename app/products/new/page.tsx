@@ -212,7 +212,7 @@ export default function NewProductPage() {
                   htmlFor="category"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Categoria
+                  Tamanho
                 </label>
                 <input
                   type="text"

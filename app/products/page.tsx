@@ -705,7 +705,7 @@ export default function ProductsPage() {
                 htmlFor="categoryFilter"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Filtrar por Categoria
+                Filtrar por Tamanho
               </label>
               <select
                 id="categoryFilter"
@@ -713,7 +713,7 @@ export default function ProductsPage() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">Todas as Categorias</option>
+                <option value="">Todos os Tamanhos</option>
                 {categories.map((category) => (
                   <option key={category} value={category}>
                     {category}

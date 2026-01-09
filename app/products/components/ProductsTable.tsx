@@ -91,7 +91,7 @@ export default function ProductsTable({
               Código
             </th>
             <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-              Categoria
+              Tamanho
             </th>
             <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
               Fornecedor

@@ -1200,7 +1200,7 @@ export default function PurchasesPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Categoria
+                    Tamanho
                   </label>
                   <div className="flex gap-2">
                     <select
@@ -1211,17 +1211,14 @@ export default function PurchasesPage() {
                           category: e.target.value,
                         })
                       }
-                      title="Selecione uma categoria"
+                      title="Selecione um tamanho"
                       className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
                     >
-                      <option value="">Selecionar Categoria</option>
-                      <option value="roupa">Roupa</option>
-                      <option value="acessorios">Acessórios</option>
-                      <option value="eletronicos">Eletrônicos</option>
-                      <option value="calçados">Calçados</option>
-                      <option value="papelaria">Papelaria</option>
-                      <option value="cosmeticos">Cosméticos</option>
-                      <option value="outros">Outros</option>
+                      <option value="">Selecionar Tamanho</option>
+                      <option value="pequeno">Pequeno</option>
+                      <option value="medio">Médio</option>
+                      <option value="grande">Grande</option>
+                      <option value="extra-grande">Extra Grande</option>
                     </select>
                   </div>
                 </div>

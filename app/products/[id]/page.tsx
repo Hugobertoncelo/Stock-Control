@@ -272,7 +272,7 @@ export default function EditProductPage({
                       htmlFor="category"
                       className="block text-sm font-medium text-gray-900 mb-2"
                     >
-                      Categoria
+                      Tamanho
                     </label>
                     <input
                       type="text"
