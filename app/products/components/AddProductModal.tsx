@@ -453,10 +453,11 @@ export default function AddProductModal({
                   className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 >
                   <option value="">Selecionar Tamanho</option>
-                  <option value="pequeno">Pequeno</option>
-                  <option value="medio">Médio</option>
-                  <option value="grande">Grande</option>
-                  <option value="extra-grande">Extra Grande</option>
+                  <option value="solteiro">Solteiro</option>
+                  <option value="casal">Casal</option>
+                  <option value="queen">Queen</option>
+                  <option value="king">King</option>
+                  <option value="super-king">Super King</option>
                 </select>
               </div>
             </div>
