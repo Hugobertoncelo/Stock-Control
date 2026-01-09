@@ -16,8 +16,13 @@ interface ProductSearchProps {
 }
 
 function generateRefNumber(product: Product) {
-  const base = `${product.id}${product.code.replace(/\D/g, "")}`;
-  return base.padStart(6, "0").slice(0, 6);
+  const str = product.id.toString();
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString().padStart(6, "0");
 }
 
 export default function ProductSearch({ products }: ProductSearchProps) {
