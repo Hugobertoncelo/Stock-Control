@@ -155,6 +155,7 @@ export default function FeaturedCrmDemoSection({
             p.photos && p.photos.length > 0
               ? `/api/products/photos/image?id=${p.photos[0].photoId}`
               : undefined,
+          category: p.category,
         }));
         setProducts(productsWithImages);
       }

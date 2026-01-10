@@ -287,9 +287,8 @@ export default function ProductDetailsModal({
               >
                 <span
                   style={{
-                    fontSize: "1.55rem",
                     fontWeight: 900,
-                    marginBottom: "0.75rem",
+                    marginBottom: "0.45rem",
                     letterSpacing: "0.18em",
                     textAlign: "center",
                     width: "100%",
@@ -337,7 +336,7 @@ export default function ProductDetailsModal({
                       style={{
                         fontSize: "0.875rem",
                         fontWeight: 600,
-                        marginBottom: "0.25rem",
+                        marginBottom: "0.35rem",
                         color: "#334155",
                       }}
                     >
@@ -352,6 +351,20 @@ export default function ProductDetailsModal({
                       }}
                     >
                       Preço: R${Number(product.unitPrice).toFixed(2)}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                        marginBottom: "0.25rem",
+                        color: "#059669",
+                      }}
+                    >
+                      Cor:{" "}
+                      {product.category
+                        ? product.category.charAt(0).toUpperCase() +
+                          product.category.slice(1)
+                        : "N/A"}
                     </span>
                     <span
                       style={{

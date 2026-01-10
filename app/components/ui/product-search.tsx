@@ -9,6 +9,7 @@ interface Product {
   code: string;
   price: number;
   imageUrl?: string;
+  category?: string;
 }
 
 interface ProductSearchProps {
@@ -92,6 +93,13 @@ export default function ProductSearch({ products }: ProductSearchProps) {
                 <div className="text-xs text-gray-500">
                   Preço: R${product.price.toFixed(2)}
                 </div>
+                <div className="text-xs text-gray-500">
+                  Cor:{" "}
+                  {product.category
+                    ? product.category.charAt(0).toUpperCase() +
+                      product.category.slice(1)
+                    : "N/A"}
+                </div>
                 <div className="text-xs text-gray-400">
                   Ref: {generateRefNumber(product)}
                 </div>
@@ -139,6 +147,13 @@ export default function ProductSearch({ products }: ProductSearchProps) {
                   <span className="font-semibold text-green-700">
                     R${selected.price.toFixed(2)}
                   </span>
+                </div>
+                <div className="text-xs text-gray-500 mb-1">
+                  Cor:{" "}
+                  {selected.category
+                    ? selected.category.charAt(0).toUpperCase() +
+                      selected.category.slice(1)
+                    : "N/A"}
                 </div>
                 <div className="text-xs text-gray-400">
                   Ref: {generateRefNumber(selected)}
