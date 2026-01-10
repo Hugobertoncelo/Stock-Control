@@ -28,6 +28,9 @@ export default function LogsPage() {
   const [loading, setLoading] = useState(true);
   const [filterAction, setFilterAction] = useState("");
   const [filterEntityType, setFilterEntityType] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [logIdToDelete, setLogIdToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     if (user && !isAdmin) {
@@ -54,6 +57,31 @@ export default function LogsPage() {
       console.error("Erro ao buscar registros:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteLog = async () => {
+    if (!logIdToDelete) return;
+    try {
+      setLoading(true);
+      setSuccessMessage("");
+      const response = await fetch("/api/logs", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logId: logIdToDelete }),
+      });
+      if (response.ok) {
+        setLogs((prev) => prev.filter((log) => log.logId !== logIdToDelete));
+        setSuccessMessage("O histórico foi apagado com sucesso.");
+      } else {
+        setSuccessMessage("Falha ao excluir atividade.");
+      }
+    } catch (error) {
+      setSuccessMessage("Erro ao excluir atividade.");
+    } finally {
+      setLoading(false);
+      setShowConfirmModal(false);
+      setLogIdToDelete(null);
     }
   };
 
@@ -357,6 +385,9 @@ export default function LogsPage() {
                     <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Detalhes
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                      Ações
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white/80 divide-y divide-gray-200">
@@ -405,6 +436,18 @@ export default function LogsPage() {
                       <td className="px-6 py-4 text-sm text-gray-700 font-semibold">
                         {log.details}
                       </td>
+                      <td className="px-6 py-4 text-sm">
+                        <button
+                          onClick={() => {
+                            setLogIdToDelete(log.logId);
+                            setShowConfirmModal(true);
+                          }}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded font-bold shadow"
+                          title="Excluir atividade"
+                        >
+                          Excluir
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -412,6 +455,18 @@ export default function LogsPage() {
             </div>
           )}
         </div>
+
+        {successMessage && (
+          <div
+            className={`my-4 px-4 py-3 rounded-xl font-bold text-center shadow-lg ${
+              successMessage.includes("sucesso")
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {successMessage}
+          </div>
+        )}
 
         <div className="mt-6 bg-white/70 backdrop-blur-lg rounded-2xl shadow-lg border-2 border-gray-200/50 p-4">
           <p className="text-sm font-bold text-gray-900">
@@ -421,6 +476,37 @@ export default function LogsPage() {
           </p>
         </div>
       </main>
+
+      {/* Modal de confirmação de exclusão */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Confirmar exclusão
+            </h3>
+            <p className="text-gray-700 mb-6">
+              Tem certeza que deseja excluir esta atividade?
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={handleDeleteLog}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold shadow"
+              >
+                Excluir
+              </button>
+              <button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setLogIdToDelete(null);
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-xl font-bold shadow"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

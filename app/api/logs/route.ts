@@ -26,3 +26,23 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { logId } = await request.json();
+    if (!logId) {
+      return NextResponse.json(
+        { error: "logId é obrigatório" },
+        { status: 400 }
+      );
+    }
+    await prisma.activityLog.delete({ where: { logId } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Erro ao excluir log de atividade:", error);
+    return NextResponse.json(
+      { error: "Falha ao excluir log de atividade" },
+      { status: 500 }
+    );
+  }
+}
