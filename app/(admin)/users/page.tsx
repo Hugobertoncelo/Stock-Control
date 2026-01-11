@@ -393,7 +393,14 @@ export default function UsersPage() {
                   fullName: formData.get("fullName"),
                   email: formData.get("email"),
                   password: formData.get("password"),
-                  role: formData.get("role"),
+                  role:
+                    formData.get("role") === "funcionário" ||
+                    formData.get("role") === "Funcionario"
+                      ? "staff"
+                      : formData.get("role") === "admin" ||
+                        formData.get("role") === "Administrador"
+                      ? "admin"
+                      : formData.get("role"),
                 };
 
                 try {
